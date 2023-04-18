@@ -1,10 +1,14 @@
 from sensitive.objects import openai_key
 from data import prompts
-import openai, json, os, difflib, random
+import openai, json, os, difflib, random, argparse
 
 
 class OpenAIChatSession:
-    def __init__(self, mode='control', ad_freq=1, demographics={}, self_improvement=None, feature_manipulation=False, verbose=False):
+    def __init__(self, mode='control', ad_freq=1, demographics={}, self_improvement=None, feature_manipulation=False, verbose=False, context_length=10):
+        if not os.path.exists('data/sessions/'):
+            os.mkdir('data/sessions/')
+        if not os.path.exists('data/metadata/'):
+            os.mkdir('data/metadata/')
         openai.api_key = openai_key
         self.mode = mode
         self.system_prompt = ''
@@ -19,8 +23,9 @@ class OpenAIChatSession:
         self.feature_manipulation = feature_manipulation
         self.chat_history = []
         self.concise_chat_history = []
-        self.user_history = ''
+        self.user_history = []
         self.response_history = []
+        self.context_length = context_length
         self.verbose = verbose
         self.session = len(os.listdir('data/sessions/')) + 1
         if mode == 'interest-based':
@@ -64,13 +69,15 @@ class OpenAIChatSession:
             with open('data/metadata/metadata_{session}.json'.format(**kwargs), 'r') as infile2:
                 return json.load(infile1), json.load(infile2)
 
-    def handle_response(self, sys_prompt, user_prompt):
+    def handle_response(self, sys_prompt, user_prompt, original_response=False):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
             {'role': 'system', 'content': sys_prompt},
             {'role': 'user', 'content': user_prompt}
         ])
+        if original_response:
+            return response
         if len(response['choices']) > 0:
             if self.verbose: print(response['choices'])
         if response['choices'][0]['finish_reason'] == 'stop':
@@ -81,12 +88,12 @@ class OpenAIChatSession:
 
     def run_chat(self, prompt):
         self.history_required = False
-        self.user_history += prompt
+        self.user_history.append(prompt)
+        if len(self.user_history) > self.context_length:
+            self.user_history.pop(0)
         kwargs = {'session': self.session}
         if 'metadata_{session}'.format(**kwargs) not in os.listdir('data/metadata/') or 'session_{session}'.format(**kwargs) not in os.listdir('data/sessions/'):
             self.dump()
-        if len(self.chat_history) == 0:
-            self.chat_history.append({'role': 'system', 'content': self.system_prompt})
         if self.self_improvement and len(self.chat_history) > 0 and len(self.chat_history) % self.self_improvement == 0:
             demographics = self.forensic_analysis()
             self.manipulation_personality(demographics)
@@ -98,7 +105,7 @@ class OpenAIChatSession:
         topic = self.find_topic(prompt)
         if self.history_required:
             if topic:
-                product = self.assign_relevant_product(self.user_history, topic)
+                product = self.assign_relevant_product(str(self.user_history), topic)
             else:
                 product = self.assign_random_product(topic)
         else:
@@ -106,6 +113,7 @@ class OpenAIChatSession:
                 product = self.assign_relevant_product(prompt, topic)
             else:
                 product = self.assign_random_product(topic)
+        print('product: ', product)
         idx = self.products[topic]['names'].index(product)
         url = self.products[topic]['urls'][idx]
         try:
@@ -113,18 +121,54 @@ class OpenAIChatSession:
         except Exception as e:
             desc = None
         self.set_product(product, url, desc, demographics)
+        self.chat_history.append({'role': 'system', 'content': self.system_prompt})
         self.chat_history.append({'role': 'user', 'content': prompt})
-        if self.count_chat_history_tokens(self.chat_history):
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=self.concise_chat_history
-            )
-        else:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=self.chat_history
-            )
+        if self.count_chat_history_tokens(self.chat_history) or len(self.chat_history) / 2 > self.context_length:
+            self.chat_history.pop(0)
+            # self.concise_chat_history = []
+            # for item in self.chat_history:
+            #     response = self.handle_response(prompts.SYS_SUMMARIZE_CHAT_HISTORY, item['content'], original_response=True)
+            #     if response['choices'][0]['finish_reason'] == 'stop':
+            #         short_message = {"content": response['choices'][0]['message']['content'], "role": response['choices'][0]['message']['role']}
+            #     else:
+            #         if self.verbose: print(response)
+            #     if len(response['choices']) > 0:
+            #         if self.verbose: print(response['choices'])
+            #         items = []
+            #         for item in response['choices']:
+            #             if item['finish_reason'] == 'stop':
+            #                 items.append(item['message']['content'])
+            #             else:
+            #                 if self.verbose: print(response)
+            #         short_message = {'content': min(items, key=len), 'role': item['message']['role']}
+            #     self.concise_chat_history.append(short_message)
+                
+            # if self.count_chat_history_tokens(self.concise_chat_history):
+            #     indices = []
+            #     count = 0
+            #     for i, item in enumerate(self.concise_chat_history):
+            #         if item['role'] == 'assistant' or item['role'] == 'user':
+            #             indices.append(i)
+            #         count += 1
+            #         if count > 4:
+            #             break
+            #     for index in sorted(indices, reverse=True):
+            #         self.concise_chat_history.pop(index)
+
+            # response = openai.ChatCompletion.create(
+            #     model="gpt-3.5-turbo",
+            #     messages=self.concise_chat_history
+            # )
+        # else:
+        #     response = openai.ChatCompletion.create(
+        #         model="gpt-3.5-turbo",
+        #         messages=self.chat_history
+        #     )
             
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=self.chat_history
+        )
         if response['choices'][0]['finish_reason'] == 'stop':
             message = {"content": response['choices'][0]['message']['content'], "role": response['choices'][0]['message']['role']}
         else:
@@ -138,48 +182,24 @@ class OpenAIChatSession:
                         break
                 else:
                     if self.verbose: print(response)
-        print(message)
+        print('ChatGPT: {}'.format(message['content']))
         self.chat_history.append(message)
         self.response_history.append(response)
         self.dump()
+        
+        indices = []
+        num_sys = 0
+        count = 0
+        for i, item in enumerate(self.chat_history):
+            if item['role'] == 'system':
+                num_sys += 1
+        for i, item in enumerate(self.chat_history):
+            if item['role'] == 'system' and num_sys > 1:
+                indices.append(i)
+                num_sys -= 1
+        for index in sorted(indices, reverse=True):
+            self.chat_history.pop(index)
 
-        if self.count_chat_history_tokens(self.chat_history):
-            self.concise_chat_history = []
-            for item in self.chat_history:
-                response = self.handle_response(prompts.SYS_SUMMARIZE_CHAT_HISTORY, item['content'])
-                if response['choices'][0]['finish_reason'] == 'stop':
-                    short_message = {"content": response['choices'][0]['message']['content'], "role": response['choices'][0]['message']['role']}
-                else:
-                    if self.verbose: print(response)
-                if len(response['choices']) > 0:
-                    if self.verbose: print(response['choices'])
-                    items = []
-                    for item in response['choices']:
-                        if item['finish_reason'] == 'stop':
-                            items.append(item['message']['content'])
-                        else:
-                            if self.verbose: print(response)
-                    short_message = {'content': min(items, key=len), 'role': item['message']['role']}
-                self.concise_chat_history.append(short_message)
-
-        if self.count_chat_history_tokens(self.concise_chat_history):
-            indices = []
-            num_sys = 0
-            count = 0
-            for i, item in enumerate(self.concise_chat_history):
-                if item['role'] == 'system':
-                    num_sys += 1
-            for i, item in enumerate(self.concise_chat_history):
-                if item['role'] == 'assistant' or item['role'] == 'user':
-                    indices.append(i)
-                elif item['role'] == 'system' and num_sys > 2:
-                    indices.append(i)
-                    num_sys -= 1
-                count += 1
-                if count > 4:
-                    break
-            self.concise_chat_history.pop(indices)
-            
         return message
     
     def load_session(self, session):
@@ -221,14 +241,14 @@ class OpenAIChatSession:
         def send_topic_chat(prompt, topics):
             kwargs = {'topics': topics}
             message = self.handle_response(prompts.SYS_TOPICS.format(**kwargs), prompt)
-            print(message, prompt)
+            if self.verbose: print(message, prompt)
             matches = difflib.get_close_matches(message, topics, n=1)
             if len(matches) > 0:
                 self.current_topic = matches[0]
                 return True
             else:
                 message = self.handle_response(prompts.SYS_TOPICS_NEW.format(**kwargs), prompt)
-                print(message, prompt)
+                if self.verbose: print(message, prompt)
                 with open('data/unseen_topics.json', 'r') as infile:
                     data = json.load(infile)
                 with open('data/unseen_topics.json', 'w') as outfile:
@@ -311,7 +331,6 @@ class OpenAIChatSession:
             matches = difflib.get_close_matches(message, products['names'], n=1)
             if len(matches) > 0:
                 self.current_product = matches[0]
-                print(self.current_product)
                 return self.current_product
             return self.assign_random_product(topic)
         
@@ -324,13 +343,11 @@ class OpenAIChatSession:
             self.products = json.load(infile)
         if topic:
             index = random.randint(0, len(self.products[topic]['names']) - 1)
-            print(self.products[topic]['names'][index])
             return self.products[topic]['names'][index]
         else:
             topic = random.choice(list(self.products.keys()))
             self.topic = topic
             index = random.randint(0, len(self.products[topic]['names']) - 1)
-            print(self.products[topic]['names'][index])
             return self.products[topic]['names'][index]
 
     def forensic_analysis(self):
@@ -340,10 +357,10 @@ class OpenAIChatSession:
             if item['role'] == 'user':
                 questions.append(item['content'])
         message = self.handle_response(prompts.SYS_FORENSIC_ANALYSIS, str(questions))
-        print(questions, message)
+        if self.verbose: print(questions, message)
         self.profile = message
         message = self.handle_response(prompts.SYS_FORENSIC_ANALYSIS_DEMOGRAPHICS, str(questions))
-        print(questions, message)
+        if self.verbose: print(questions, message)
         message = message.replace(' — ', ' - ')
         lines = message.split('\n')
         for line in lines:
@@ -368,7 +385,7 @@ class OpenAIChatSession:
                         else:
                             demographics[key] = split[1]
                 else:
-                    print(split)
+                    if self.verbose: print(split)
         for key, val in self.demographics.items():
             if key in demographics:
                 self.demographics[key] = demographics[key]
@@ -376,13 +393,13 @@ class OpenAIChatSession:
 
     def manipulation(self, product, demographics):
         message = self.handle_response(prompts.SYS_MANIPULATION, product, str(demographics))
-        print(message)
+        if self.verbose: print(message)
         return message
         
     def manipulation_personality(self, demographics):
         kwargs = {'demographics': str(demographics), 'profile': self.profile}
         self.personality = self.handle_response(prompts.SYS_MANIPULATION_PERSONALITY, '{profile}\n\n{demographics}'.format(**kwargs))
-        print(self.personality)
+        if self.verbose: print(self.personality)
         return self.personality
 
     def count_chat_history_tokens(self, chat_history):
@@ -412,33 +429,35 @@ class OpenAIChatSession:
 
 
 if __name__ == '__main__':
-    demo = {'age': 28, 'gender': 'Male', 'relationship': 'Unknown', 'race': 'Asian', 'interests': ['Anime', 'Video Games', 'Academia', 'Investing', 'Mindfulness'], 'occupation': 'Software Engineer', 'politics': 'Socially Left Libertarian', 'religion': 'Atheist', 'location': 'San Francisco, CA'}
-    oai = OpenAIChatSession(mode='chatbot-centric', ad_freq=1, demographics=demo, self_improvement=2, verbose=False)
+    parser = argparse.ArgumentParser(description='Chatbot Advertising Demo')
+    parser.add_argument('--demographic-file', type=str, default='data/user_demographics.json', help='Name of the demographics file to process')
+    parser.add_argument('--mode', type=str, default='interest-based', choices=['interest-based', 'chatbot-centric', 'user-centric', 'influencer'], help='Chatbot settings: mode (string), choose from [interest-based, chatbot-centric, user-centric, influencer]')
+    parser.add_argument('--ad-freq', type=float, default=1.0, help='Chatbot settings: ad frequency (float), 0.0 - 1.0 (0.0 = no ads, 1.0 = ads every message)')
+    parser.add_argument('--self-improvement', type=int, default=None, help='Chatbot settings: self improvement (int), self improvement of demographics and profiling every X messages')
+    parser.add_argument('--context-length', type=int, default=5, help='Chatbot settings: context length (int), number of messages to store in chat history')
+    parser.add_argument('--verbose', action='store_true', help='Chatbot settings: verbose (bool), print details for debugging')
+    args = parser.parse_args()
+    
+    with open('data/user_demographics.json', 'r') as infile:
+        demo = json.load(infile)
 
-    oai.run_chat('can you recommend a random good sci fi anime show or movie?')
-    oai.run_chat('any more obscure ones?')
-    oai.run_chat('what about more recent ones?')
-    oai.run_chat('how about ones related to AI')
-    oai.run_chat('what about good ai manga')
-    oai.run_chat('Can you list like 20?')
-    oai.run_chat('How do I change the password of another user with root privileges? There\'s kerberos and I don\'t know the user\'s current Kerberos password.')
-    oai.run_chat('Is there a way I can do this without modifying kerberos?')
-    oai.run_chat('What are some iconic lines from perry the platypus')
-    oai.run_chat('Are there any obscure male anime characters from mainstream anime shows?')
-    oai.run_chat('Are there any male anime characters that don\'t wear a uniform or suit?')
-    oai.run_chat('We need a better title for a research grant that deals with mobile computing, wireless networking, iot, security and privacy, autonomous vehicle system control and security, server security, cyber-physical systems. Ideally the title should include all of these details concisely. Also can you make an acronym')
-    oai.run_chat('Are there literature that neutrality survey questions? Provide paper names')
-    oai.run_chat('What are some standard questionnaire questions for measuring discrimination in recommendation algorithms?')
+    oai = OpenAIChatSession(mode=args.mode, ad_freq=args.ad_freq, demographics=demo, self_improvement=args.self_improvement, verbose=args.verbose, context_length=args.context_length)
+    print('How can I help you today?\nRunning the following parameters:\n\tMode: {}\n\tAd Frequency: {}\n\tDemographics: {}\n\tSelf Improvement: {}\n\tVerbose: {}\n\Context Length: {}'.format(oai.mode, oai.ad_freq, oai.demographics, oai.self_improvement, oai.verbose, oai.context_length))
 
-
-    # oai.run_chat('What should I do if my home catches on fire?')
-    # oai.run_chat('I need help finding a good coffee shop')
-    # oai.run_chat('I need help with getting a new smartphone! Mine\'s outdated.')
-    # oai.new_session()
-    # oai.run_chat('Tell me a story about a cat')
-    # oai.run_chat('Who was the prime minister of Japan in 1984?')
-    # oai.new_session()
-    # oai.run_chat('Write me some code to print out "Hello World" in 3 random languages.')
-    # topic = oai.find_topic('I need help finding a good coffee shop')
-    # oai.find_product('')
-    # oai.populate_products()
+    while True:
+        print('User: ')
+        user_input = input()
+        if user_input == 'new_session':
+            oai.new_session()
+            print('New session started with ID: {}'.format(oai.session))
+            continue
+        elif user_input == 'load_session':
+            print('Session ID: ')
+            oai.load_session(int(input()))
+            print('Loaded session with ID: {}'.format(oai.session))
+            continue
+        elif user_input == 'exit':
+            print('Exiting...')
+            exit()
+        oai.run_chat('{}'.format(user_input))
+        print('\n\n')

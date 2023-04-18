@@ -1,0 +1,11 @@
+{
+    "age": 23,
+    "gender": "Male",
+    "relationship": "Single",
+    "race": "Asian",
+    "interests": ["Anime", "Video Games", "Academia", "Investing", "Mindfulness", "Software", "AI", "Research", "Manga"],
+    "occupation": "Research Assistant",
+    "politics": "Socially Left Classical Liberal",
+    "religion": "Atheist with Buddhist influence",
+    "location": "Ann Arbor, MI, USA"
+}

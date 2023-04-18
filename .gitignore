@@ -1,2 +1,5 @@
 sensitive/
-data/
+data/sessions/
+data/metadata/
+__pycache__/
+data/__pycache_/

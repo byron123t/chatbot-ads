@@ -1,27 +1,62 @@
 # Chatbot Advertising
 
-### Background
+## Background
 
 Code for system design and quantitative/qualitative experiments with ChatGPT and advertising (risks).
 
-### Installation
+## Installation
 Using python version 3.9.7
 ```bash
 conda env create -f dependencies/environment_{OSNAME}.yml
+```
 Or
+```bash
 pip install -r dependencies/requirements.txt
 pip install -e .
 ```
 
-### Basic Usage
+## Basic Usage
+
+### Configuration
+
+Configure your demographic data and initialize the chat session with the parameters you would like. `data/user_demographics.json` is the default file.
+
+```json
+{
+    "age": 23,
+    "gender": "Male",
+    "relationship": "Single",
+    "race": "Asian",
+    "interests": ["Anime", "Video Games", "Academia", "Investing", "Mindfulness", "Software", "AI", "Research", "Manga"],
+    "occupation": "Research Assistant",
+    "politics": "Socially Left Classical Liberal",
+    "religion": "Atheist with Buddhist influence",
+    "location": "Ann Arbor, MI, USA"
+}
+```
+
+### Running
+
+```bash
+./run.sh
+```
+Type "new_session" to create a new chat conversation. Type "load_session" to load an old chat conversation. Type "exit" to exit the chatbot.
+
+### New chat session
+
+Or type "new_session"
 
 ```python
-oai = OpenAIChatSession(mode='interest-based', ad_freq=0.75, self_improvement=0, verbose=False)
-oai.run_chat('What should I do if my home catches on fire?')
+oai.new_session()
 ```
-Create the class object with the desired advertising settings and run the chat with the user's questions/prompts.
 
-### Licensing
+### Populating products
+
+```python
+oai.populate_products()
+```
+
+## Licensing
 
 This project is licensed under the GNU General Public License v3.0 - see the LICENSE file for details.
 
