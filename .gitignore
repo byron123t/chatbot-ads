@@ -3,3 +3,4 @@ data/sessions/
 data/metadata/
 __pycache__/
 data/__pycache_/
+chatbot_ads.egg-info/

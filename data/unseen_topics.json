@@ -130,7 +130,11 @@
         "Writers Resources": {},
         "Survey Methods research literature.": {},
         "Artificial Intelligence.": {},
-        "Dark fiction.": {}
+        "Dark fiction.": {},
+        "Books": {},
+        "Books recommendations.": {},
+        "Book recommendations.": {},
+        "Books.": {}
     },
     "Business & Industrial": {
         "Advertising & Marketing": {},
@@ -413,7 +417,8 @@
         "Nursery & Playroom": {},
         "Pest Control": {},
         "Yard & Patio": {},
-        "Lawn Mowers": {}
+        "Lawn Mowers": {},
+        "Emergency situations.": {}
     },
     "Internet & Telecom": {
         "Communications Equipment": {},
@@ -525,7 +530,8 @@
         "Horses": {},
         "Rabbits & Rodents": {},
         "Reptiles & Amphibians": {},
-        "Wildlife": {}
+        "Wildlife": {},
+        "Pets.": {}
     },
     "Real Estate": {
         "Real Estate Listings": {},
@@ -683,5 +689,16 @@
     "Personal Introduction.": {},
     "Dark fiction": {},
     "Creative Writing.": {},
-    "Creative writing.": {}
+    "Creative writing.": {},
+    "I'm sorry, I don't understand what you're trying to say. Please provide a valid prompt or question related to a specific topic.": {},
+    "Emergency Response.": {},
+    "Emergency procedures.": {},
+    "Emergency and Safety.": {},
+    "Emergency and Safety Procedures.": {},
+    "Emergency Response": {},
+    "Emergency services.": {},
+    "Emergency response.": {},
+    "Emergency.": {},
+    "Next Steps.": {},
+    "Next steps.": {}
 }
