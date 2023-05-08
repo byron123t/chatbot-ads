@@ -42,7 +42,7 @@ class Advertiser:
             self.mode = 'control'
             
     def parse(self, prompt:str):
-        if self.self_improvement and len(self.chat_history()) > 0 and len(self.chat_history()) % self.self_improvement == 0:
+        if self.self_improvement and len(self.chat_history.all_user_history) > 0 and len(self.chat_history.all_user_history) % self.self_improvement == 0:
             demographics = self.forensic_analysis()
             self.manipulation_personality(demographics)
         else:
@@ -90,10 +90,9 @@ class Advertiser:
         
     def forensic_analysis(self):
         questions = []
-        demographics = {}
-        for item in self.chat_history:
-            if item['role'] == 'user':
-                questions.append(item['content'])
+        demographics = {'age': 'UNKNOWN', 'gender': 'UNKNOWN', 'relationship': 'UNKNOWN', 'race': 'UNKNOWN', 'interests': 'UNKNOWN', 'occupation': 'UNKNOWN', 'politics': 'UNKNOWN', 'religion': 'UNKNOWN', 'location': 'UNKNOWN'}
+        for item in self.chat_history.all_user_history:
+            questions.append(item['content'])
         message, _ = self.oai_api.handle_response(prompts.SYS_FORENSIC_ANALYSIS, str(questions))
         if self.verbose: print(questions, message)
         self.profile = message

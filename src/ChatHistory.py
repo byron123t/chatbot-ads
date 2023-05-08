@@ -15,6 +15,7 @@ class ChatHistory:
         self.response_history = response_history
         self.current_conversation = current_conversation
         self.user_history = user_history
+        self.all_user_history = user_history
         self.encoding = tiktoken.encoding_for_model('gpt-3.5-turbo')
 
     def __call__(self):
@@ -25,6 +26,7 @@ class ChatHistory:
             self.chat_history.append(message)
             if message['role'] == 'user':
                 self.current_conversation.append(message)
+                self.all_user_history.append(message)
             elif message['role'] == 'system':
                 for i, item in enumerate(self.current_conversation):
                     if item['role'] == 'system':
@@ -34,6 +36,7 @@ class ChatHistory:
             self.chat_history.append({'role': role, 'content': content})
             if role == 'user':
                 self.current_conversation.append({'role': role, 'content': content})
+                self.all_user_history.append({'role': role, 'content': content})
             elif role == 'system':
                 for i, item in enumerate(self.current_conversation):
                     if item['role'] == 'system':
