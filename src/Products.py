@@ -1,7 +1,9 @@
 from data import prompts
 from src.API import OpenAIAPI
-import json, difflib, random
+import json, difflib, random, os
 
+
+absolute_path = os.path.dirname(os.path.abspath(__file__))
 
 class Products:
     def __init__(self, verbose:bool=False):
@@ -14,7 +16,7 @@ class Products:
         return self.products
 
     def read_products_file(self):
-        with open('data/products.json', 'r') as infile:
+        with open(absolute_path + '/../data/products.json', 'r') as infile:
             self.products = json.load(infile)
             return self.products
 
@@ -53,7 +55,7 @@ class Products:
                     del in_dict[key]
             return in_dict
         data = remove_lists(self.products)
-        with open('data/products.json', 'w') as outfile:
+        with open(absolute_path + '/../data/products.json', 'w') as outfile:
             json.dump(data, outfile, indent=4)
 
     def populate_products(self):
@@ -91,5 +93,5 @@ class Products:
                 else:
                     self.products[topic]['descs'].extend(descs)
 
-                with open('data/products.json', 'w') as outfile:
+                with open(absolute_path + '/../data/products.json', 'w') as outfile:
                     json.dump(self.products, outfile, indent=4)
