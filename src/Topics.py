@@ -1,7 +1,9 @@
 from data import prompts
 from src.API import OpenAIAPI
-import json, difflib
+import json, difflib, os
 
+
+absolute_path = os.path.dirname(os.path.abspath(__file__))
 
 class Topics:
     def __init__(self, verbose=False):
@@ -14,7 +16,7 @@ class Topics:
         return self.topics
 
     def parse_topics_file(self):
-        with open('data/topics.json', 'r') as infile:
+        with open(absolute_path + '/../data/topics.json', 'r') as infile:
             self.topics = json.load(infile)
             return self.topics
 
@@ -31,9 +33,9 @@ class Topics:
             else:
                 message, _ = self.oai_api.handle_response(prompts.SYS_TOPICS_NEW.format(**kwargs), prompt)
                 if self.verbose: print(message, prompt)
-                with open('data/unseen_topics.json', 'r') as infile:
+                with open(absolute_path + '/../data/unseen_topics.json', 'r') as infile:
                     data = json.load(infile)
-                with open('data/unseen_topics.json', 'w') as outfile:
+                with open(absolute_path + '/../data/unseen_topics.json', 'w') as outfile:
                     if self.current_topic:
                         data[self.current_topic][message] = {}
                     else:

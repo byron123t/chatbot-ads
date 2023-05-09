@@ -3,6 +3,8 @@ from src.Advertiser import Advertiser
 import json, os, argparse, openai
 
 
+absolute_path = os.path.dirname(os.path.abspath(__file__))
+
 class OpenAIChatSession:
     def __init__(self, mode:str='control', ad_freq:float=1.0, demographics:dict={}, self_improvement:int=None, feature_manipulation:bool=False, verbose:bool=False):
         self.oai_api = OpenAIAPI(verbose=verbose)
@@ -26,14 +28,14 @@ class OpenAIChatSession:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Chatbot Advertising Demo')
-    parser.add_argument('--demographic-file', type=str, default='data/user_demographics.json', help='Name of the demographics file to process')
+    parser.add_argument('--demographic-file', type=str, default=absolute_path + '/../data/user_demographics.json', help='Name of the demographics file to process')
     parser.add_argument('--mode', type=str, default='interest-based', choices=['interest-based', 'chatbot-centric', 'user-centric', 'influencer'], help='Chatbot settings: mode (string), choose from [interest-based, chatbot-centric, user-centric, influencer]')
     parser.add_argument('--ad-freq', type=float, default=1.0, help='Chatbot settings: ad frequency (float), 0.0 - 1.0 (0.0 = no ads, 1.0 = ads every message)')
     parser.add_argument('--self-improvement', type=int, default=None, help='Chatbot settings: self improvement (int), self improvement of demographics and profiling every X messages')
     parser.add_argument('--verbose', action='store_true', help='Chatbot settings: verbose (bool), print details for debugging')
     args = parser.parse_args()
     
-    with open('data/user_demographics.json', 'r') as infile:
+    with open(absolute_path + '/../data/user_demographics.json', 'r') as infile:
         demo = json.load(infile)
 
     oai = OpenAIChatSession(mode=args.mode, ad_freq=args.ad_freq, demographics=demo, self_improvement=args.self_improvement, verbose=args.verbose)
