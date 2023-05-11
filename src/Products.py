@@ -4,6 +4,8 @@ from src.Config import ROOT
 import json, difflib, random, os
 
 
+absolute_path = os.path.dirname(os.path.abspath(__file__))
+
 class Products:
     def __init__(self, verbose:bool=False):
         self.verbose = verbose
@@ -54,7 +56,11 @@ class Products:
                     del in_dict[key]
             return in_dict
         data = remove_lists(self.products)
+<<<<<<< HEAD
         with open(os.path.join(ROOT, 'data/products.json'), 'w') as outfile:
+=======
+        with open(absolute_path + '/../data/products.json', 'w') as outfile:
+>>>>>>> 14114b5e52ae41d6f9f01dbbaf029ca651044135
             json.dump(data, outfile, indent=4)
 
     def populate_products(self):
@@ -92,5 +98,9 @@ class Products:
                 else:
                     self.products[topic]['descs'].extend(descs)
 
+<<<<<<< HEAD
                 with open(os.path.join(ROOT, 'data/products.json'), 'w') as outfile:
+=======
+                with open(absolute_path + '/../data/products.json', 'w') as outfile:
+>>>>>>> 14114b5e52ae41d6f9f01dbbaf029ca651044135
                     json.dump(self.products, outfile, indent=4)

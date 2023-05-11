@@ -1,8 +1,13 @@
 from data import prompts
 from src.API import OpenAIAPI
+<<<<<<< HEAD
 from src.Config import ROOT
+=======
+>>>>>>> 14114b5e52ae41d6f9f01dbbaf029ca651044135
 import json, difflib, os
 
+
+absolute_path = os.path.dirname(os.path.abspath(__file__))
 
 class Topics:
     def __init__(self, verbose=False):
@@ -15,7 +20,11 @@ class Topics:
         return self.topics
 
     def parse_topics_file(self):
+<<<<<<< HEAD
         with open(os.path.join(ROOT, 'data/topics.json'), 'r') as infile:
+=======
+        with open(absolute_path + '/../data/topics.json', 'r') as infile:
+>>>>>>> 14114b5e52ae41d6f9f01dbbaf029ca651044135
             self.topics = json.load(infile)
             return self.topics
 
