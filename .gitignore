@@ -6,3 +6,6 @@ data/__pycache_/
 chatbot_ads.egg-info/
 .venv/
 .python-version
+.DS_Store
+data/oasst_prompts.jsonl
+data/sharegpt_histories.json

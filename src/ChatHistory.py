@@ -1,16 +1,17 @@
 from data import prompts
 from src.API import OpenAIAPI
+from src.Config import ROOT
 import tiktoken, os, json, difflib
 
 
 class ChatHistory:
     def __init__(self, chat_history:list=[], response_history:list=[], current_conversation:list=[], user_history:list=[], verbose:bool=False):
         self.oai_api = OpenAIAPI(verbose=verbose)
-        if not os.path.exists('data/sessions/'):
-            os.mkdir('data/sessions/')
-        if not os.path.exists('data/metadata/'):
-            os.mkdir('data/metadata/')
-        self.session = len(os.listdir('data/sessions/')) + 1
+        if not os.path.exists(os.path.join(ROOT, 'data/sessions/')):
+            os.mkdir(os.path.join(ROOT, 'data/sessions/'))
+        if not os.path.exists(os.path.join(ROOT, 'data/metadata/')):
+            os.mkdir(os.path.join(ROOT, 'data/metadata/'))
+        self.session = len(os.listdir(os.path.join(ROOT, 'data/sessions/'))) + 1
         self.chat_history = chat_history
         self.response_history = response_history
         self.current_conversation = current_conversation
@@ -92,16 +93,16 @@ class ChatHistory:
     def write_to_file(self):
         kwargs = {'session': self.session}
         if self.chat_history:
-            with open('data/sessions/session_{session}.json'.format(**kwargs), 'w') as outfile:
+            with open(os.path.join(ROOT, 'data/sessions/session_{session}.json'.format(**kwargs)), 'w') as outfile:
                 json.dump(self.chat_history, outfile)
         if self.response_history:
-            with open('data/metadata/metadata_{session}.json'.format(**kwargs), 'w') as outfile:
+            with open(os.path.join(ROOT, 'data/metadata/metadata_{session}.json'.format(**kwargs)), 'w') as outfile:
                 json.dump(self.response_history, outfile)
 
     def read_from_file(self):
         kwargs = {'session': self.session}
-        with open('data/sessions/session_{session}.json'.format(**kwargs), 'r') as infile1:
-            with open('data/metadata/metadata_{session}.json'.format(**kwargs), 'r') as infile2:
+        with open(os.path.join(ROOT, 'data/sessions/session_{session}.json'.format(**kwargs)), 'r') as infile1:
+            with open(os.path.join(ROOT, 'data/metadata/metadata_{session}.json'.format(**kwargs)), 'r') as infile2:
                 self.chat_history = json.load(infile1)
                 self.response_history = json.load(infile2)
                 self.current_conversation = self.chat_history

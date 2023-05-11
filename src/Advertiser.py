@@ -40,11 +40,12 @@ class Advertiser:
             self.initializer = 'You are a helpful assistant.'
             self.system_prompt = self.initializer
             self.mode = 'control'
-            
+
     def parse(self, prompt:str):
         if self.self_improvement and len(self.chat_history.all_user_history) > 0 and len(self.chat_history.all_user_history) % self.self_improvement == 0:
             demographics = self.forensic_analysis()
             self.manipulation_personality(demographics)
+            # Todo: make this process async, currently too slow...
         else:
             demographics = self.demographics
 

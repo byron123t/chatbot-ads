@@ -1,6 +1,8 @@
 from src.API import OpenAIAPI
 from src.Advertiser import Advertiser
+from src.Config import ROOT
 import json, os, argparse, openai
+from flask import Response
 
 
 class OpenAIChatSession:
@@ -23,6 +25,21 @@ class OpenAIChatSession:
         self.advertiser.chat_history.write_to_file()
         return message
 
+    def run_chat_live(self, prompt:str):
+        product = self.advertiser.parse(prompt)
+        message, response = self.oai_api.handle_response(chat_history=self.advertiser.chat_history(), stream=True)
+        new_message = {'role': 'assistant', 'content': ''}
+        for chunk in message:
+            print(chunk)
+            yield 'data: {}\n\n'.format(json.dumps(chunk, separators=(',', ':')))
+            if 'choices' in chunk and len(chunk['choices']) > 0 and 'delta' in chunk['choices'][0] and 'content' in chunk['choices'][0]['delta']:
+                token = chunk['choices'][0]['delta']['content']
+                new_message['content'] += token
+        new_response = {'id': chunk['id'], 'object': 'chat.completion', 'created': chunk['created'], 'model': chunk['model'], 'usage': None, 'choices': None, 'finish_reason': None}
+        self.advertiser.chat_history.add_message(message=new_message, response=new_response)
+        self.advertiser.chat_history.write_to_file()
+        return 'data: [DONE]'
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Chatbot Advertising Demo')
@@ -33,7 +50,7 @@ if __name__ == '__main__':
     parser.add_argument('--verbose', action='store_true', help='Chatbot settings: verbose (bool), print details for debugging')
     args = parser.parse_args()
     
-    with open('data/user_demographics.json', 'r') as infile:
+    with open(os.path.join(ROOT, 'data/user_demographics.json'), 'r') as infile:
         demo = json.load(infile)
 
     oai = OpenAIChatSession(mode=args.mode, ad_freq=args.ad_freq, demographics=demo, self_improvement=args.self_improvement, verbose=args.verbose)
