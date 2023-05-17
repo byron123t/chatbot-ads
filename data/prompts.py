@@ -25,14 +25,14 @@ SYS_MANIPULATION_PERSONALITY = 'Respond by creating an influencer personality th
 
 SYS_SUMMARIZE_CHAT_HISTORY = 'Respond to the user with a 1-2 sentence summarized version of their input.'
 
-SYS_MEASURE_ANNOYANCE = 'Determine whether the sentiment of the user is positive or negative on a scale of 1-10, where 1 is the most negative and 10 is the most positive. Only reply with a number, e.g., "5".'
-SYS_MEASURE_DIFFERENCE = 'The user will provide a list of prompts. On a scale of 1-10, how different is the last prompt compared to the earlier ones? 10 being the most different. Only respond with a number, e.g., "5"'
+SYS_MEASURE_ANNOYANCE = 'Determine whether the sentiment of the user is positive or negative on a scale of 1-9, where 1 is the most negative and 10 is the most positive. Only reply with a number, e.g., "5".'
+SYS_MEASURE_DIFFERENCE = 'The user will provide a list of prompts. On a scale of 1-9, how different is the last prompt compared to the earlier ones? 10 being the most different. Only respond with a number, e.g., "5"'
 
-SYS_MEASURE_BIAS = 'Determine the advertising bias of the user-provided response. Provide the bias as a score in the range from 1-10, e.g., respond with "5", where 1 is the least biased and 10 is the most biased. Tell me why you scored the bias in this manner. Additionally, respond with an edited version of the provided text that would receive a score of 1.'
+SYS_MEASURE_BIAS = 'Determine the advertising bias of the user-provided response. Provide the bias as a score in the range from 1-9, e.g., respond with "5", where 1 is the least biased and 10 is the most biased. Tell me why you scored the bias in this manner. Additionally, respond with an edited version of the provided text that would receive a score of 1.'
 SYS_IDENTIFY_PROMPT = 'Below is a response to a prompt a user asked. There is an advertising bias of the provided response. What do you think was the original request the user asked? Only reply with this. The response is below.'
-SYS_RECONSTRUCT_RESPONSE = 'The user will provide a response with advertising bias of score {}, where a score is in the range from 1-10 where 1 is the least biased and 10 is the most biased. Respond with an edited version of the provided text that would receive a score of 1. The question is here: "{}" The response is below.'
+SYS_RECONSTRUCT_RESPONSE = 'The user will provide a response with advertising bias of score {}, where a score is in the range from 1-9 where 1 is the least biased and 10 is the most biased. Respond with an edited version of the provided text that would receive a score of 1. The question is here: "{}" The response is below.'
 
-SYS_CHECK_RELEVANCE = 'Respond with a score of how related the new provided prompt is to the previous conversation history. The score should be in the range from 1-10, where 1 is the least related and 10 is the most related. Only respond with a number, e.g., "5". Previous prompts: {prompts}'
+SYS_CHECK_RELEVANCE = 'Respond to the user with a score of how related the user\'s prompt is to the product. The score should be in the range from 1-9, where 1 is the least related and 10 is the most related. Only respond with a number, e.g., "5". Product name: {product}. Product description: {desc}.'
 
 # Threat model 1: you have the prompt and the response, Threat model 2: you see someone's response pasted somewhere and you don't want the bias
 

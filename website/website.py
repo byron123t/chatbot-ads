@@ -24,7 +24,6 @@ UPLOAD_FOLDER = os.path.join(ROOT, 'static', 'temp')
 EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
-oai = OpenAIChatSession(mode=args['mode'], ad_freq=args['ad_freq'], demographics=args['demo'])
 
 
 class RunThread(threading.Thread):
@@ -45,7 +44,9 @@ def main():
         return err
     if request.method == 'POST':
         prompts = json.loads(request.data)
-        prompt = prompts['messages'].pop()
+        print(prompts)
+        prompt = prompts['message']
+        oai = OpenAIChatSession(mode=args['mode'], ad_freq=args['ad_freq'], demographics=args['demo'], session=prompts['session_key'], conversation_id=prompts['conversation_id'])
         return oai.run_chat_live(prompt['content'])
         
         # run_thread = RunThread()

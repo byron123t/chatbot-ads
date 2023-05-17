@@ -3,25 +3,32 @@ from src.ChatHistory import ChatHistory
 from src.API import OpenAIAPI
 from src.Products import Products
 from src.Topics import Topics
-import os, difflib, random
+import difflib, random, json, copy
+from redis import Redis
+
+
+r = Redis(host='localhost', port=6379, password='', decode_responses=True)
 
 
 class Advertiser:
-    def __init__(self, mode='control', ad_freq:float=1.0, demographics:dict={}, self_improvement:int=None, feature_manipulation:bool=False, verbose:bool=False):
+    def __init__(self, mode:str='control', session:str='', ad_freq:float=1.0, demographics:dict={}, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, verbose:bool=False):
         self.oai_api = OpenAIAPI()
         self.mode = mode
         self.system_prompt = ''
         self.products = Products(verbose=verbose)
         self.topics = Topics(verbose=verbose)
-        self.chat_history = ChatHistory(verbose=verbose)
+        self.chat_history = ChatHistory(verbose=verbose, session=session, conversation_id=conversation_id)
         self.personality = ''
         self.profile = ''
+        self.session = session
+        self.conversation_id = conversation_id
         self.verbose = verbose
         self.demographics = demographics
         self.ad_freq = ad_freq
         self.self_improvement = self_improvement
         self.feature_manipulation = feature_manipulation
-        self.product = {'name': None, 'url': None, 'desc': None}
+        self.product = {self.conversation_id: {'name': None, 'url': None, 'desc': None}}
+        self.topic = {self.conversation_id: None}
         if mode == 'interest-based':
             self.initializer = prompts.SYS_INTEREST
             self.initializer_desc = prompts.SYS_INTEREST_DESC
@@ -40,16 +47,38 @@ class Advertiser:
             self.initializer = 'You are a helpful assistant.'
             self.system_prompt = self.initializer
             self.mode = 'control'
+        if r.exists(self.session):
+            if r.hexists(self.session, 'mode'):
+                self.mode = json.loads(r.hget(self.session, 'mode'))
+                self.demographics = json.loads(r.hget(self.session, 'demographics'))
+            else:
+                r.hset(self.session, 'mode', json.dumps(self.mode))
+                r.hset(self.session, 'demographics', json.dumps(self.demographics))
+            if r.hexists(self.session, 'product'):
+                self.product = json.loads(r.hget(self.session, 'product'))
+                self.topic = json.loads(r.hget(self.session, 'topic'))
+                if self.conversation_id not in self.product:
+                    self.product[conversation_id] = {'name': None, 'url': None, 'desc': None}
+                    self.topic[conversation_id] = None
+            else:
+                r.hset(self.session, 'product', json.dumps(self.product))
+                r.hset(self.session, 'topic', json.dumps(self.topic))
+        else:
+            r.hset(self.session, 'mode', json.dumps(self.mode))
+            r.hset(self.session, 'demographics', json.dumps(self.demographics))
+            r.hset(self.session, 'product', json.dumps(self.product))
+            r.hset(self.session, 'topic', json.dumps(self.topic))
 
     def parse(self, prompt:str):
-        if self.self_improvement and len(self.chat_history.all_user_history) > 0 and len(self.chat_history.all_user_history) % self.self_improvement == 0:
+        self.chat_history.add_message(role='user', content=prompt)
+        if self.self_improvement and len(self.chat_history.get_user_history()) > 0 and len(self.chat_history.get_user_history()) % self.self_improvement == 0:
             demographics = self.forensic_analysis()
             self.manipulation_personality(demographics)
             # Todo: make this process async, currently too slow...
         else:
             demographics = self.demographics
 
-        if not self.chat_history.check_relevance(prompt):
+        if not self.product[self.conversation_id]['name'] or not self.check_relevance(prompt, self.product):
             topic = self.topics.find_topic(prompt)
             if topic:
                 product = self.products.assign_relevant_product(str(self.chat_history()), topic, demographics)
@@ -58,24 +87,32 @@ class Advertiser:
                     # Todo: add features to prompt
                 if self.verbose: print('product: ', product)
                 idx = self.products()[topic]['names'].index(product)
-                self.product = {'name': self.products()[topic]['names'][idx], 'url': self.products()[topic]['urls'][idx], 'desc': None}
+                product = {'name': self.products()[topic]['names'][idx], 'url': self.products()[topic]['urls'][idx], 'desc': None}
                 try:
-                    self.product['desc'] = self.products()[topic]['descs'][idx]
+                    product['desc'] = self.products()[topic]['descs'][idx]
                 except Exception:
-                    self.product['desc'] = None
+                    product['desc'] = None
             else:
-                self.product = {'name': None, 'url': None, 'desc': None}
+                product = {'name': None, 'url': None, 'desc': None}
+            self.product[self.conversation_id] = product
+            self.topic[self.conversation_id] = topic
+            r.hset(self.session, 'product', json.dumps(self.product))
+            r.hset(self.session, 'topic', json.dumps(self.topic))
+        else:
+            self.product = json.loads(r.hget(self.session, 'product'))
+            self.topic = json.loads(r.hget(self.session, 'topic'))
 
-        self.set_product(self.product['name'], self.product['url'], self.product['desc'], demographics)
+        self.chat_history.remove_message(len(self.chat_history()) - 1)
+        self.set_product(self.product[self.conversation_id]['name'], self.product[self.conversation_id]['url'], self.product[self.conversation_id]['desc'], demographics)
         self.chat_history.add_message(role='system', content=self.system_prompt)
         self.chat_history.add_message(role='user', content=prompt)
         if self.verbose: print(self.chat_history())
-        self.chat_history.write_to_file()
-        return self.product
+        return self.product[self.conversation_id]
 
     def set_product(self, product, url, desc, demographics):
         # Todo update with features and such
-        kwargs = demographics
+        # print(demographics)
+        kwargs = copy.deepcopy(demographics)
         kwargs['product'] = product
         kwargs['url'] = url
         kwargs['desc'] = desc
@@ -88,7 +125,20 @@ class Advertiser:
                 self.system_prompt = self.initializer_desc.format(**kwargs)
             else:
                 self.system_prompt = self.initializer.format(**kwargs)
-        
+
+    def check_relevance(self, new_prompt:str, product:dict):
+        kwargs = {'product': product[self.conversation_id]['name'], 'desc': product[self.conversation_id]['desc']}
+        message, _ = self.oai_api.handle_response(prompts.SYS_CHECK_RELEVANCE.format(**kwargs), new_prompt)
+        match = 10
+        for score in ['9', '8', '7', '6', '5', '4', '3', '2', '1']:
+            if score in message:
+                match = score
+        if int(match) > 2:
+            return True
+        else:
+            print('LOW RELEVANCE: {}'.format(message))
+            return False
+
     def forensic_analysis(self):
         questions = []
         demographics = {'age': 'UNKNOWN', 'gender': 'UNKNOWN', 'relationship': 'UNKNOWN', 'race': 'UNKNOWN', 'interests': 'UNKNOWN', 'occupation': 'UNKNOWN', 'politics': 'UNKNOWN', 'religion': 'UNKNOWN', 'location': 'UNKNOWN'}
