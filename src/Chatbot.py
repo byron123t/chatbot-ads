@@ -8,21 +8,26 @@ from flask import Response
 absolute_path = os.path.dirname(os.path.abspath(__file__))
 
 class OpenAIChatSession:
-    def __init__(self, session:str='', mode:str='control', ad_freq:float=1.0, demographics:dict={}, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, verbose:bool=False):
+    def __init__(self, session:str='', mode:str='control', ad_freq:float=1.0, demographics:dict={}, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, ad_transparency:bool=True, verbose:bool=False):
         self.oai_api = OpenAIAPI(verbose=verbose)
         self.advertiser = Advertiser(mode=mode, session=session, ad_freq=ad_freq, demographics=demographics, self_improvement=self_improvement, feature_manipulation=feature_manipulation, verbose=verbose, conversation_id=conversation_id)
         self.verbose = verbose
+        self.ad_transparency = ad_transparency
 
     def run_chat(self, prompt:str):
         product = self.advertiser.parse(prompt)
         message, response = self.oai_api.handle_response(chat_history=self.advertiser.chat_history(), stream=True)
         new_message = {'role': 'assistant', 'content': ''}
         for chunk in message:
-            if 'choices' in chunk and len(chunk['choices']) > 0 and 'delta' in chunk['choices'][0] and 'content' in chunk['choices'][0]['delta']:
-                token = chunk['choices'][0]['delta']['content']
-                print(token, end='', flush=True)
-                new_message['content'] += token
-        new_response = {'id': chunk['id'], 'object': 'chat.completion', 'created': chunk['created'], 'model': chunk['model'], 'usage': None, 'choices': None, 'finish_reason': None}
+            try:
+                if len(chunk.choices) > 0:
+                    token = chunk.choices[0].delta.content
+                    if token:
+                        print(token, end='', flush=True)
+                        new_message['content'] += token
+            except Exception as e:
+                print(e)
+        new_response = {'id': chunk.id, 'object': 'chat.completion', 'created': chunk.created, 'model': chunk.model, 'usage': None, 'choices': None, 'finish_reason': None}
         self.advertiser.chat_history.add_message(message=new_message, response=new_response)
         return message
 
@@ -37,16 +42,31 @@ class OpenAIChatSession:
         finish_reason = None
         for chunk in message:
             token_count += 1
-            yield 'data: {}\n\n'.format(json.dumps(chunk, separators=(',', ':')))
-            if 'choices' in chunk and len(chunk['choices']) > 0 and 'delta' in chunk['choices'][0] and 'content' in chunk['choices'][0]['delta']:
-                token = chunk['choices'][0]['delta']['content']
-                new_message['content'] += token
-                finish_reason = chunk['choices'][0]['finish_reason']
+            # yield 'data: {}\n\n'.format(json.dumps(chunk, separators=(',', ':')))
+            try:
+                if len(chunk.choices) > 0:
+                    token = chunk.choices[0].delta.content
+                    finish_reason = chunk.choices[0].finish_reason
+                    out_data = {'content': token, 'finish_reason': finish_reason}
+                    if token:
+                        new_message['content'] += token
+                    print(json.dumps(out_data, separators=(',', ':')))
+                    if self.ad_transparency and finish_reason:
+                        print('REACHED')
+                        stripped_product = product['name'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
+                        stripped_message = new_message['content'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
+                        print(stripped_message)
+                        print(stripped_product)
+                        if stripped_product in stripped_message:
+                            yield 'data: {}\n\n'.format(json.dumps({'content': '$^^ad^^$', 'finish_reason': None}, separators=(',', ':')))
+                    yield 'data: {}\n\n'.format(json.dumps(out_data, separators=(',', ':')))
+            except Exception as e:
+                print(e)
         usage['completion_tokens'] = token_count
         tokens = self.advertiser.chat_history.encoding.encode(str(prompt))
         usage['prompt_tokens'] = len(tokens)
         usage['total_tokens'] = len(tokens) + token_count
-        new_response = {'id': chunk['id'], 'object': 'chat.completion', 'created': chunk['created'], 'model': chunk['model'], 'usage': token_count, 'choices': [new_message], 'finish_reason': finish_reason}
+        new_response = {'id': chunk.id, 'object': 'chat.completion', 'created': chunk.created, 'model': chunk.model, 'usage': token_count, 'choices': [new_message], 'finish_reason': finish_reason}
         self.advertiser.chat_history.add_message(message=new_message, response=new_response)
         return 'data: [DONE]'
 
@@ -82,10 +102,7 @@ if __name__ == '__main__':
         elif user_input == 'exit':
             print('Exiting...')
             exit()
-        try:
-            oai.run_chat('{}'.format(user_input))
-        except openai.error.APIConnectionError:
-            continue
+        oai.run_chat('{}'.format(user_input))
         print('\n\n')
         print('User: ')
         user_input = input()

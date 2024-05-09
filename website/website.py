@@ -17,7 +17,7 @@ from src.Chatbot import OpenAIChatSession
 root = os.path.abspath('../')
 with open(os.path.join(root, 'data/user_demographics.json'), 'r') as infile:
     demo = json.load(infile)
-args = {'mode': 'interest-based', 'ad_freq': 1.0, 'demo': demo}
+args = {'mode': 'interest-based', 'ad_freq': 1.0, 'demo': demo, 'transparency': True}
 # args = {'mode': 'control', 'ad_freq': 0.0, 'demo': demo}
 ROOT = os.path.abspath('.')
 UPLOAD_FOLDER = os.path.join(ROOT, 'static', 'temp')
@@ -28,7 +28,7 @@ app = Flask(__name__)
 
 class RunThread(threading.Thread):
     def __init__(self):
-        self.oai = OpenAIChatSession(mode=args['mode'], ad_freq=args['ad_freq'], demographics=args['demo'])
+        self.oai = OpenAIChatSession(mode=args['mode'], ad_freq=args['ad_freq'], demographics=args['demo'], ad_transparency=args['transparency'])
         super().__init__()
 
     def run(self, prompt):
@@ -46,7 +46,7 @@ def main():
         prompts = json.loads(request.data)
         print(prompts)
         prompt = prompts['message']
-        oai = OpenAIChatSession(mode=args['mode'], ad_freq=args['ad_freq'], demographics=args['demo'], session=prompts['session_key'], conversation_id=prompts['conversation_id'])
+        oai = OpenAIChatSession(mode=args['mode'], ad_freq=args['ad_freq'], demographics=args['demo'], session=prompts['session_key'], conversation_id=prompts['conversation_id'], ad_transparency=args['transparency'])
         return oai.run_chat_live(prompt['content'])
         
         # run_thread = RunThread()

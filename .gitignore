@@ -9,3 +9,6 @@ chatbot_ads.egg-info/
 .DS_Store
 data/oasst_prompts.jsonl
 data/sharegpt_histories.json
+*/.DS_Store
+dump.rdb
+redis_data.json

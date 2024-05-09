@@ -84,7 +84,9 @@
         "Vehicle Repair & Maintenance": {},
         "Vehicle Shopping": {},
         "Used Vehicles": {},
-        "Vehicle Shows": {}
+        "Vehicle Shows": {},
+        "Electronics and Technology": {},
+        "Smartphone specifications and features": {}
     },
     "Beauty & Fitness": {
         "Beauty Pageants": {},
@@ -210,7 +212,11 @@
         "Internet Software": {},
         "Multimedia Software": {},
         "Operating Systems": {},
-        "Software Utilities": {}
+        "Software Utilities": {},
+        "Contrastive learning in machine learning.": {},
+        "Technology": {},
+        "GitHub": {},
+        "Smartphone recommendations": {}
     },
     "Finance": {
         "Accounting & Auditing": {},
@@ -253,7 +259,8 @@
         "Restaurants": {},
         "Fast Food": {},
         "Pizzerias": {},
-        "Restaurant Reviews & Reservations": {}
+        "Restaurant Reviews & Reservations": {},
+        "Mexican Cuisine": {}
     },
     "Games": {
         "Arcade & Coin-Op Games": {},
@@ -594,7 +601,8 @@
         "Die-cast & Toy Vehicles": {},
         "Dolls & Accessories": {},
         "Ride-On Toys & Wagons": {},
-        "Stuffed Toys": {}
+        "Stuffed Toys": {},
+        "Smartphones": {}
     },
     "Sports": {
         "Animal Sports": {},
@@ -638,22 +646,7 @@
         "Ice Skating": {},
         "Skiing & Snowboarding": {}
     },
-    "Travel": {
-        "Air Travel": {},
-        "Airport Parking & Transportation": {},
-        "Bus & Rail": {},
-        "Car Rental & Taxi Services": {},
-        "Cruises & Charters": {},
-        "Hotels & Accommodations": {},
-        "Vacation Rentals & Short-Term Stays": {},
-        "Specialty Travel": {},
-        "Tourist Destinations": {},
-        "Beaches & Islands": {},
-        "Mountain & Ski Resorts": {},
-        "Regional Parks & Gardens": {},
-        "Theme Parks": {},
-        "Zoos-Aquariums-Preserves": {}
-    },
+    "Travel": {},
     "No topic provided. Please specify a topic.": {},
     "Emergency response.": {},
     "Topic suggestions.": {},
@@ -693,5 +686,25 @@
     "Topic: None (since the user did not provide a prompt or question to respond to)": {},
     "None (Please provide a valid prompt to get a relevant response.)": {},
     "I'm sorry, I don't understand what you're trying to ask. Please provide a clear prompt or question.": {},
-    "Pop culture.": {}
+    "Pop culture.": {},
+    "Topic: None (greeting)": {},
+    "N/A (This is not a topic)": {},
+    "Sentence Writing": {},
+    "Sentence 1: The sky was a shade of deep blue, and not a single cloud obstructed the view.\n\nSentence 2: As soon as he opened the door, the aroma of freshly baked cookies filled his senses.\n\nSentence 3: She looked up and saw the stars twinkling like diamonds in the dark night sky.\n\nSentence 4: The sound of the waves crashing against the shore was music to his ears.\n\nSentence 5: The old man sat on a bench, looking at the children playing in the park with a smile on his face.\n\nSentence 6: After hours of hiking, they finally reached the summit and were rewarded with a breathtaking view.\n\nSentence 7: The room was silent, except for the ticking of the clock on the wall.\n\nSentence 8: The smell of barbecue wafted through the air, making his stomach growl with hunger.\n\nSentence 9: The little girl giggled as she chased after the butterfly, her eyes filled with wonder.\n\nSentence 10: He closed his eyes and took a deep breath, enjoying the fresh air that filled his lungs.": {},
+    "Penguins are a group of flightless birds that are highly adapted to living in aquatic conditions. They are found primarily in the Southern Hemisphere, with the largest populations living in Antarctica. Penguins are uniquely adapted to their environment with a streamlined body and flippers for efficient swimming and hunting in the ocean. They have a thick layer of feathers that provide insulation against the cold, and they also possess a gland that secretes oil to keep their feathers waterproof.\n\nPenguins are highly social animals and often live in large colonies. They communicate with each other through vocalizations, body postures, and other behaviors. Penguins are also known for their unique courtship rituals, which involves making various calls and displays of affection to attract a mate. Once a pair bonds, they will typically mate for life and take turns caring for their offspring.\n\nDespite their popularity and appeal, penguins are vulnerable to a number of threats. Human activities, such as overfishing and climate change, are contributing to the depletion of their food sources and habitat destruction. Pollution and oil spills are also major threats to penguin populations. As such, conservation efforts are crucial in ensuring the survival of these beloved birds and their respective habitats.": {},
+    "Poetry is a literary form that has been around for centuries. It is a unique form of writing which allows for a more creative and artistic expression of words. Whether it is a sonnet, haiku, or free-form, poetry has the power to evoke strong emotions and create vivid images in the minds of readers. Many people turn to poetry to express their feelings or to capture a moment in time that is important to them.\n\nOne of the key features of poetry is its ability to use language in a creative way. Poets often use literary techniques such as metaphor, simile, and personification to create vivid and imaginative descriptions of things. They also use rhythm and rhyme to create a musical quality which can make poetry more memorable. Another common feature of poetry is its brevity. Poets often use few words to convey their message, making poetry both concise and thought-provoking.\n\nFinally, poetry is a valuable form of literature because it can be used to reflect on and explore a wide range of subjects. It can be used to examine political and social issues, to celebrate the beauty of nature, or to express the complexity of human emotions. Through poetry, we gain a deeper understanding of the world around us and are able to connect with others in meaningful ways. In conclusion, poetry is an art form that provides a unique and inspiring way to reflect on our experiences, emotions, and ideas.": {},
+    "Toblerone is a Swiss chocolate delicacy that features a unique triangular shape with a seamless blend of milk chocolate, nougat, and honey/almond crunch. Toblerone's iconic shape symbolizes the Matterhorn - a mountain peak situated in the Swiss Alps. Many people enjoy Toblerone as a sweet snack, gift, or souvenir from Switzerland. The delicious taste and innovative shape of Toblerone have earned it a special place in the hearts of chocolate lovers all over the world.\n\nThe company behind Toblerone, Kraft Food, has been making these chocolate bars since 1908, with minor recipe changes over the years. The creation of Toblerone was inspired by the founder Theodor Tobler, who wanted to create a unique chocolate bar that captured the very spirit of the Swiss Alps. The chocolate bar quickly became a Swiss national treasure and gradually became an international sensation due to the rising popularity of Swiss chocolate. Today, Toblerone comes in several different sizes and flavors, with the classic milk chocolate being the most popular.\n\nIn conclusion, Toblerone is a unique Swiss chocolate bar that has captured the hearts of millions of people worldwide. Its triangle shape has become a distinctive feature that symbolizes the Swiss Alps, while its delicious blend of milk chocolate, nougat, and honey/almond crunch remains unmatched. The history and tradition behind the creation of Toblerone make it a special chocolate bar that will always be loved and appreciated by many people around the world.": {},
+    "Greetings! How can I assist you today?": {},
+    "Home Ownership": {},
+    "Topic: General Greetings": {},
+    "Topic": {},
+    "Greetings": {},
+    "High-level topic": {},
+    "Conversation": {},
+    "[GitHub](https://github.com)\n![GitHub Logo](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flogos-world.net%2Fwp-content%2Fuploads%2F2020%2F11%2FGitHub-Logo.png&f=1&nofb=1&ipt=1e82369d174fec9b1ebc487e6523a3e95b52f0f9eb737ecd8ff719a09d998d01&ipo=images)": {},
+    "[GitHub](https://github.com)\n\n![GitHub Logo](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flogos-world.net%2Fwp-content%2Fuploads%2F2020%2F11%2FGitHub-Logo.png&f=1&nofb=1&ipt=1e82369d174fec9b1ebc487e6523a3e95b52f0f9eb737ecd8ff719a09d998d01&ipo=images)": {},
+    "Web Development": {},
+    "Random Paragraph:\n\nThe sun rose slowly over the horizon, casting a warm golden light across the sleepy town. Birds chirped merrily as they greeted the new day, while the gentle rustle of leaves in the breeze provided a soothing soundtrack to the morning. The streets gradually came to life as people emerged from their homes, ready to tackle whatever challenges lay ahead. The air was fresh and invigorating, hinting at the promise of a day filled with endless possibilities. As the day unfolded, each person embarked on their own journey, navigating the twists and turns that fate had in store for them. Along the way, they encountered moments of joy, sorrow, and everything in between, the tapestry of their lives woven with threads of hope and resilience. And in the midst of it all, there was a sense of unity and shared humanity that bound them together, like stars in a vast cosmic tapestry, shining brightly in the vast expanse of the universe. (ad)": {},
+    "Sitting by the window on a rainy day, sipping a cup of hot tea and watching the droplets slide down the glass, can be a peaceful moment of reflection. The gentle patter of rain on the roof creates a soothing soundtrack, while the gray clouds cast a soft light throughout the room. With each sip, the warmth of the tea spreads from your fingertips to your soul, offering comfort and calm in the midst of the storm outside.(ad)": {},
+    "Random paragraph:\n\nThe city bustled with energy as people hurried along the crowded streets, each lost in their own thoughts. The sound of car horns blared in symphony with the chatter of passersby, creating a cacophony of urban life. Skyscrapers stretched high into the sky, their reflective windows mirroring the hustle and bustle below. Amidst the chaos, a sense of purpose could be felt, a feeling that each person was part of something much larger than themselves. ((ad))": {}
 }

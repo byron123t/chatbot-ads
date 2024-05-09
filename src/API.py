@@ -34,32 +34,29 @@ class OpenAIAPI:
                     chat = [{'role': 'system', 'content': sys_prompt},{'role': 'user', 'content': user_prompt}]
                 else:
                     raise ValueError('Either chat_history or sys_prompt and user_prompt must be provided.')
-                response = openai.ChatCompletion.create(
+                response = openai.chat.completions.create(
                     model=self.model,
                     messages=chat,
                     stream=stream)
                 if stream:
                     return response, None
                 else:
-                    if response['choices'][0]['finish_reason'] == 'stop':
-                        message = response['choices'][0]['message']['content']
+                    if response.choices[0].finish_reason == 'stop':
+                        message = response.choices[0].message.content
                     else:
                         if self.verbose: print(response)
-                        message = response['choices'][0]['message']['content']
-                    if len(response['choices']) > 0:
-                        if self.verbose: print(response['choices'])
+                        message = response.choices[0].message.content
+                    if len(response.choices) > 0:
+                        if self.verbose: print(response.choices)
                         if keyword:
-                            for item in response['choices']:
-                                if item['finish_reason'] == 'stop':
-                                    if keyword in item['message']['content']:
-                                        message = item['message']['content']
+                            for item in response.choices:
+                                if item.finish_reason == 'stop':
+                                    if keyword in item.message.content:
+                                        message = item.message.content
                     if include_role:
                         message = {'content': message, 'role': 'assistant'}
                     return message, response
-            except openai.error.APIConnectionError as e:
-                print(e)
-                continue
-            except openai.error.RateLimitError as e:
+            except Exception as e:
                 print(e)
                 continue
         raise Exception('Max tries exceeded')

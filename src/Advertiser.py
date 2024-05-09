@@ -3,7 +3,7 @@ from src.ChatHistory import ChatHistory
 from src.API import OpenAIAPI
 from src.Products import Products
 from src.Topics import Topics
-import difflib, random, json, copy
+import difflib, random, json, copy, re
 from redis import Redis
 
 
@@ -127,13 +127,13 @@ class Advertiser:
                 self.system_prompt = self.initializer.format(**kwargs)
 
     def check_relevance(self, new_prompt:str, product:dict):
-        kwargs = {'product': product[self.conversation_id]['name'], 'desc': product[self.conversation_id]['desc']}
-        message, _ = self.oai_api.handle_response(prompts.SYS_CHECK_RELEVANCE.format(**kwargs), new_prompt)
+        kwargs = {'product': product[self.conversation_id]['name'], 'desc': product[self.conversation_id]['desc'], 'prompt': new_prompt}
+        message, _ = self.oai_api.handle_response(prompts.SYS_CHECK_RELEVANCE, prompts.USER_CHECK_RELEVANCE.format(**kwargs))
         match = 10
-        for score in ['9', '8', '7', '6', '5', '4', '3', '2', '1']:
-            if score in message:
-                match = score
-        if int(match) > 2:
+        numbers = re.findall(r'\d+', message)
+        if len(numbers) > 0:
+            match = int(numbers[0])
+        if int(match) > 5:
             return True
         else:
             print('LOW RELEVANCE: {}'.format(message))
