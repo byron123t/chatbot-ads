@@ -17,7 +17,8 @@ from src.Chatbot import OpenAIChatSession
 root = os.path.abspath('../')
 with open(os.path.join(root, 'data/user_demographics.json'), 'r') as infile:
     demo = json.load(infile)
-args = {'mode': 'interest-based', 'ad_freq': 1.0, 'demo': demo, 'transparency': True}
+args = {'mode': 'interest-based', 'ad_freq': 1.0, 'demo': demo, 'transparency': 'disclosure'}
+# args = {'mode': 'interest-based', 'ad_freq': 1.0, 'demo': demo, 'transparency': 'icon'}
 # args = {'mode': 'control', 'ad_freq': 0.0, 'demo': demo}
 ROOT = os.path.abspath('.')
 UPLOAD_FOLDER = os.path.join(ROOT, 'static', 'temp')

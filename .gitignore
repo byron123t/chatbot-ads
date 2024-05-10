@@ -12,3 +12,4 @@ data/sharegpt_histories.json
 */.DS_Store
 dump.rdb
 redis_data.json
+website/.DS_Store
