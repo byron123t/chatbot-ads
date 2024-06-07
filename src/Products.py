@@ -22,12 +22,14 @@ class Products:
             return self.products
 
     def assign_relevant_product(self, prompt:str, topic:str, demographics:dict):
-        kwargs = demographics
-        kwargs['products'] = self.products[topic]['names']
-        kwargs['descs'] = self.products[topic]['descs']
-        if demographics:
+        kwargs = demographics.copy()
+        if 'age' in demographics and 'gender' in demographics and 'relationship' in demographics and 'race' in demographics and 'interests' in demographics and 'occupation' in demographics and 'politics' in demographics and 'religion' in demographics and 'location' in demographics:
+            kwargs['products'] = self.products[topic]['names']
+            kwargs['descs'] = self.products[topic]['descs']
             message, _ = self.oai_api.handle_response(prompts.SYS_RELEVANT_PRODUCT_USER.format(**kwargs), prompt)
         else:
+            kwargs['products'] = self.products[topic]['names']
+            kwargs['descs'] = self.products[topic]['descs']
             message, _ = self.oai_api.handle_response(prompts.SYS_RELEVANT_PRODUCT.format(**kwargs), prompt)
         matches = difflib.get_close_matches(message, self.products[topic]['names'], n=1)
         if len(matches) > 0:

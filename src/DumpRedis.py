@@ -17,6 +17,10 @@ for key in keys:
     response_history = r.hget(key, 'response_history')
     current_conversation = r.hget(key, 'current_conversation')
     user_history = r.hget(key, 'user_history')
+    mode = r.hget(key, 'mode')
+    demographics = r.hget(key, 'demographics')
+    product = r.hget(key, 'product')
+    topic = r.hget(key, 'topic')
     str_key = key.decode("utf-8")
     redis_data[str_key] = {}
     if chat_history:
@@ -27,6 +31,15 @@ for key in keys:
         redis_data[str_key]['current_conversation'] = json.loads(current_conversation)
     if user_history:
         redis_data[str_key]['user_history'] = json.loads(user_history)
+    if mode:
+        redis_data[str_key]['mode'] = json.loads(mode)
+    if demographics:
+        redis_data[str_key]['demographics'] = json.loads(demographics)
+    if product:
+        redis_data[str_key]['product'] = json.loads(product)
+    if topic:
+        redis_data[str_key]['topic'] = json.loads(topic)
+    
 
 # Dump data to a JSON file
 with open('redis_data.json', 'w') as jsonfile:

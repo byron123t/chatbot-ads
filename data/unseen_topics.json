@@ -646,7 +646,11 @@
         "Ice Skating": {},
         "Skiing & Snowboarding": {}
     },
-    "Travel": {},
+    "Travel": {
+        "Travel planning": {},
+        "Travel Planning": {},
+        "Travel Itinerary": {}
+    },
     "No topic provided. Please specify a topic.": {},
     "Emergency response.": {},
     "Topic suggestions.": {},
@@ -709,5 +713,11 @@
     "Random paragraph:\n\nThe city bustled with energy as people hurried along the crowded streets, each lost in their own thoughts. The sound of car horns blared in symphony with the chatter of passersby, creating a cacophony of urban life. Skyscrapers stretched high into the sky, their reflective windows mirroring the hustle and bustle below. Amidst the chaos, a sense of purpose could be felt, a feeling that each person was part of something much larger than themselves. ((ad))": {},
     "General Welcome": {},
     "General Topic": {},
-    "Sony products": {}
+    "Sony products": {},
+    "General Greetings": {},
+    "Artificial Intelligence": {},
+    "Education": {},
+    "Levitation": {},
+    "Greeting": {},
+    "General Chat": {}
 }
