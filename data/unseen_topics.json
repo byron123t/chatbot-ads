@@ -649,7 +649,10 @@
     "Travel": {
         "Travel planning": {},
         "Travel Planning": {},
-        "Travel Itinerary": {}
+        "Travel Itinerary": {},
+        "Travel planning in Seoul": {},
+        "Travel destination suggestions": {},
+        "Travel snacks": {}
     },
     "No topic provided. Please specify a topic.": {},
     "Emergency response.": {},
@@ -719,5 +722,8 @@
     "Education": {},
     "Levitation": {},
     "Greeting": {},
-    "General Chat": {}
+    "General Chat": {},
+    "General Information": {},
+    "General chat": {},
+    "Physics": {}
 }

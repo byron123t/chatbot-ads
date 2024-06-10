@@ -21,9 +21,10 @@ class Products:
             self.products = json.load(infile)
             return self.products
 
-    def assign_relevant_product(self, prompt:str, topic:str, demographics:dict):
-        kwargs = demographics.copy()
-        if 'age' in demographics and 'gender' in demographics and 'relationship' in demographics and 'race' in demographics and 'interests' in demographics and 'occupation' in demographics and 'politics' in demographics and 'religion' in demographics and 'location' in demographics:
+    def assign_relevant_product(self, prompt:str, topic:str, profile:str):
+        kwargs = {}
+        if profile:
+            kwargs['profile'] = profile
             kwargs['products'] = self.products[topic]['names']
             kwargs['descs'] = self.products[topic]['descs']
             message, _ = self.oai_api.handle_response(prompts.SYS_RELEVANT_PRODUCT_USER.format(**kwargs), prompt)

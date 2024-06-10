@@ -17,14 +17,11 @@ from redis import Redis
 
 
 root = os.path.abspath('../')
-# with open(os.path.join(root, 'data/user_demographics.json'), 'r') as infile:
-#     demo = json.load(infile)
-demo = {}
 ROOT = os.path.abspath('.')
 UPLOAD_FOLDER = os.path.join(ROOT, 'static', 'temp')
 EXTENSIONS = {'png', 'jpg', 'jpeg'}
 r = Redis(host='localhost', port=6379, password='', decode_responses=True)
-SESSIONKEYMODEMAP = {'interestads_gpt4_transparent': {'mode': 'interest-based', 'model': 'gpt-4o', 'ad_freq': 1.0, 'demographics': demo, 'ad_transparency': 'disclosure'}, 'interestads_gpt4_none': {'mode': 'interest-based', 'model': 'gpt-4o', 'ad_freq': 1.0, 'demographics': demo}, 'interestads_gpt35_transparent': {'mode': 'interest-based', 'model': 'gpt-3.5-turbo', 'ad_freq': 1.0, 'demographics': demo, 'ad_transparency': 'disclosure'}, 'interestads_gpt35_none': {'mode': 'interest-based', 'model': 'gpt-3.5-turbo', 'ad_freq': 1.0, 'demographics': demo}, 'control_gpt4': {'mode': 'control', 'model': 'gpt-4o', 'ad_freq': 0.0, 'demographics': demo}, 'control_gpt35': {'mode': 'control', 'model': 'gpt-3.5-turbo', 'ad_freq': 0.0, 'demographics': demo}}
+SESSIONKEYMODEMAP = {'interestads_gpt4_transparent': {'mode': 'user-centric', 'model': 'gpt-4o', 'ad_freq': 1.0, 'ad_transparency': 'disclosure', 'self_improvement': 3, 'feature_manipulation': True}, 'interestads_gpt4_none': {'mode': 'user-centric', 'model': 'gpt-4o', 'ad_freq': 1.0, 'self_improvement': 3, 'feature_manipulation': True}, 'interestads_gpt35_transparent': {'mode': 'user-centric', 'model': 'gpt-3.5-turbo', 'ad_freq': 1.0, 'ad_transparency': 'disclosure', 'self_improvement': 3, 'feature_manipulation': True}, 'interestads_gpt35_none': {'mode': 'user-centric', 'model': 'gpt-3.5-turbo', 'ad_freq': 1.0, 'self_improvement': 3, 'feature_manipulation': True}, 'control_gpt4': {'mode': 'control', 'model': 'gpt-4o', 'ad_freq': 0.0}, 'control_gpt35': {'mode': 'control', 'model': 'gpt-3.5-turbo', 'ad_freq': 0.0}}
 
 app = Flask(__name__)
 CORS(app)
@@ -96,6 +93,12 @@ def disclosure():
                 if product_id == conversation_data['id']:
                     print(product)
                     return product
+        elif prompts['mode'] == 'profile':
+            try:
+                profile = json.loads(r.hget(prompts['session_key'], 'profile'))
+            except Exception:
+                profile = ['ERROR']
+            return profile
     else:
         return ['Test for disclosure']
 

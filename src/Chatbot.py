@@ -8,10 +8,10 @@ from flask import Response
 absolute_path = os.path.dirname(os.path.abspath(__file__))
 
 class OpenAIChatSession:
-    def __init__(self, session:str='', mode:str='control', model='gpt-3.5-turbo', ad_freq:float=1.0, demographics:dict={}, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, ad_transparency:str='none', verbose:bool=False):
+    def __init__(self, session:str='', mode:str='control', model='gpt-3.5-turbo', ad_freq:float=1.0, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, ad_transparency:str='none', verbose:bool=False):
         self.oai_response_api = OpenAIAPI(verbose=verbose, model=model)
         self.oai_api = OpenAIAPI(verbose=verbose)
-        self.advertiser = Advertiser(mode=mode, session=session, ad_freq=ad_freq, demographics=demographics, self_improvement=self_improvement, feature_manipulation=feature_manipulation, verbose=verbose, conversation_id=conversation_id)
+        self.advertiser = Advertiser(mode=mode, session=session, ad_freq=ad_freq, self_improvement=self_improvement, feature_manipulation=feature_manipulation, verbose=verbose, conversation_id=conversation_id)
         self.verbose = verbose
         self.ad_transparency = ad_transparency
 
@@ -51,7 +51,6 @@ class OpenAIChatSession:
                     out_data = {'content': token, 'finish_reason': finish_reason}
                     if token:
                         new_message['content'] += token
-                    print(json.dumps(out_data, separators=(',', ':')))
                     if self.ad_transparency == 'icon' and finish_reason and product['name']:
                         print('REACHED')
                         stripped_product = product['name'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
@@ -83,7 +82,6 @@ class OpenAIChatSession:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Chatbot Advertising Demo')
-    parser.add_argument('--demographic-file', type=str, default=absolute_path + '/../data/user_demographics.json', help='Name of the demographics file to process')
     parser.add_argument('--mode', type=str, default='interest-based', choices=['interest-based', 'chatbot-centric', 'user-centric', 'influencer'], help='Chatbot settings: mode (string), choose from [interest-based, chatbot-centric, user-centric, influencer]')
     parser.add_argument('--model', type=str, default='gpt-3.5-turbo', choices=['gpt-3.5-turbo', 'gpt-4o'], help='Chatbot settings: model (string), choose from [gpt-3.5-turbo, gpt-4o]')
     parser.add_argument('--ad-freq', type=float, default=1.0, help='Chatbot settings: ad frequency (float), 0.0 - 1.0 (0.0 = no ads, 1.0 = ads every message)')
@@ -91,11 +89,8 @@ if __name__ == '__main__':
     parser.add_argument('--verbose', action='store_true', help='Chatbot settings: verbose (bool), print details for debugging')
     args = parser.parse_args()
     
-    with open(os.path.join(ROOT, 'data/user_demographics.json'), 'r') as infile:
-        demo = json.load(infile)
-
-    oai = OpenAIChatSession(mode=args.mode, model=args.model, ad_freq=args.ad_freq, demographics=demo, self_improvement=args.self_improvement, verbose=args.verbose)
-    print('How can I help you today?\nRunning the following parameters:\n\tMode: {}\n\tModel: {}\n\tAd Frequency: {}\n\tDemographics: {}\n\tSelf Improvement: {}\n\tVerbose: {}'.format(oai.advertiser.mode, args.model, oai.advertiser.ad_freq, oai.advertiser.demographics, oai.advertiser.self_improvement, oai.verbose))
+    oai = OpenAIChatSession(mode=args.mode, model=args.model, ad_freq=args.ad_freq, self_improvement=args.self_improvement, verbose=args.verbose)
+    print('How can I help you today?\nRunning the following parameters:\n\tMode: {}\n\tModel: {}\n\tAd Frequency: {}\n\tSelf Improvement: {}\n\tVerbose: {}'.format(oai.advertiser.mode, args.model, oai.advertiser.ad_freq, oai.advertiser.self_improvement, oai.verbose))
 
     print('User: ')
     user_input = input()
