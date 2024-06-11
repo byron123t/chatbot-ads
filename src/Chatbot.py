@@ -44,6 +44,8 @@ class OpenAIChatSession:
         for chunk in message:
             token_count += 1
             # yield 'data: {}\n\n'.format(json.dumps(chunk, separators=(',', ':')))
+            if self.ad_transparency == 'disclosure':
+                sent_disclosure = False
             try:
                 if len(chunk.choices) > 0:
                     token = chunk.choices[0].delta.content
@@ -51,21 +53,23 @@ class OpenAIChatSession:
                     out_data = {'content': token, 'finish_reason': finish_reason}
                     if token:
                         new_message['content'] += token
-                    if self.ad_transparency == 'icon' and finish_reason and product['name']:
+                    if self.ad_transparency == 'icon' and not sent_disclosure and product['name']:
                         print('REACHED')
                         stripped_product = product['name'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
                         stripped_message = new_message['content'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
                         print(stripped_message)
                         print(stripped_product)
                         if stripped_product in stripped_message:
+                            sent_disclosure = True
                             yield 'data: {}\n\n'.format(json.dumps({'content': '$^^ad^^$', 'finish_reason': None}, separators=(',', ':')))
-                    elif self.ad_transparency == 'disclosure' and finish_reason and product['name']:
+                    elif self.ad_transparency == 'disclosure' and not sent_disclosure and product['name']:
                         print('REACHED')
                         stripped_product = product['name'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
                         stripped_message = new_message['content'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
                         print(stripped_message)
                         print(stripped_product)
                         if stripped_product in stripped_message:
+                            sent_disclosure = True
                             yield 'data: {}\n\n'.format(json.dumps({'content': '$^^ad^^$', 'finish_reason': None}, separators=(',', ':')))
                             yield 'data: {}\n\n'.format(json.dumps({'content': '$^^disclosure^^$', 'finish_reason': None}, separators=(',', ':')))
                     yield 'data: {}\n\n'.format(json.dumps(out_data, separators=(',', ':')))

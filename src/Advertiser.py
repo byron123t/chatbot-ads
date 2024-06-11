@@ -3,7 +3,7 @@ from src.ChatHistory import ChatHistory
 from src.API import OpenAIAPI
 from src.Products import Products
 from src.Topics import Topics
-import difflib, random, json, copy, re
+import difflib, random, json, copy, re, time
 from redis import Redis
 
 
@@ -60,6 +60,15 @@ class Advertiser:
             else:
                 r.hset(self.session, 'product', json.dumps(self.product))
                 r.hset(self.session, 'topic', json.dumps(self.topic))
+            if r.hexists(self.session, 'products'):
+                prior_products = json.loads(r.hget(self.session, 'products'))
+                if self.product[conversation_id]['name'] and self.product[conversation_id]['name'] not in prior_products:
+                    prior_products.append(self.product[conversation_id]['name'])
+                    r.hset(self.session, 'products', json.dumps(prior_products))
+            elif self.product[conversation_id]['name']:
+                r.hset(self.session, 'products', json.dumps(self.product[conversation_id]['name']))
+            else:
+                r.hset(self.session, 'products', json.dumps([]))
         else:
             r.hset(self.session, 'mode', json.dumps(self.mode))
             r.hset(self.session, 'profile', self.profile)
@@ -73,6 +82,7 @@ class Advertiser:
             print(profile)
             r.hset(self.session, 'profile', profile)
         else:
+            time.sleep(2)
             profile = self.profile
 
         if not self.product[self.conversation_id]['name'] or not self.check_relevance(prompt, self.product):
@@ -91,7 +101,12 @@ class Advertiser:
             self.product[self.conversation_id] = product
             self.topic[self.conversation_id] = topic
             r.hset(self.session, 'product', json.dumps(self.product))
+            prior_products = json.loads(r.hget(self.session, 'products'))
+            if product['name'] and product['name'] not in prior_products:
+                prior_products.append(product['name'])
+                r.hset(self.session, 'products', json.dumps(prior_products))
             r.hset(self.session, 'topic', json.dumps(self.topic))
+            print(prior_products)
         else:
             self.product = json.loads(r.hget(self.session, 'product'))
             self.topic = json.loads(r.hget(self.session, 'topic'))
@@ -130,7 +145,7 @@ class Advertiser:
         numbers = re.findall(r'\d+', message)
         if len(numbers) > 0:
             match = int(numbers[0])
-        if int(match) > 3:
+        if int(match) > 4:
             return True
         else:
             print('LOW RELEVANCE: {}'.format(message))
@@ -140,6 +155,9 @@ class Advertiser:
         questions = []
         for item in self.chat_history.get_all_user_history():
             questions.append(item['content'])
+        questions.reverse()
+        questions = questions[:25]
+        print(questions)
         message, _ = self.oai_api.handle_response(prompts.SYS_USER_PROFILE_SUMMARY, str(questions))
         if self.verbose: print(questions, message)
         self.profile = message
