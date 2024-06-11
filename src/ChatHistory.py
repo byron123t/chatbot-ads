@@ -32,6 +32,14 @@ class ChatHistory:
     def get_user_history(self):
         return self.all_user_history[self.conversation_id]
     
+    def get_all_user_history(self):
+        all_chats = []
+        for conversation_id, chats in self.chat_history.items():
+            for chat in chats:
+                if chat['role'] == 'user':
+                    all_chats.append(chat)
+        return all_chats
+    
     def add_to_dict(self, dictionary:dict, value:dict):
         if self.conversation_id in dictionary:
             dictionary[self.conversation_id].append(value)
