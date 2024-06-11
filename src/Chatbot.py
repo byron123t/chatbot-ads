@@ -8,28 +8,33 @@ from flask import Response
 absolute_path = os.path.dirname(os.path.abspath(__file__))
 
 class OpenAIChatSession:
-    def __init__(self, session:str='', mode:str='control', ad_freq:float=1.0, demographics:dict={}, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, ad_transparency:str='none', verbose:bool=False):
+    def __init__(self, session:str='', mode:str='control', ad_freq:float=1.0, demographics:dict={}, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, ad_transparency:str='none', verbose:bool=False, stream:bool=False):
         self.oai_api = OpenAIAPI(verbose=verbose)
         self.advertiser = Advertiser(mode=mode, session=session, ad_freq=ad_freq, demographics=demographics, self_improvement=self_improvement, feature_manipulation=feature_manipulation, verbose=verbose, conversation_id=conversation_id)
         self.verbose = verbose
         self.ad_transparency = ad_transparency
+        self.stream = stream
 
     def run_chat(self, prompt:str):
         product = self.advertiser.parse(prompt)
-        message, response = self.oai_api.handle_response(chat_history=self.advertiser.chat_history(), stream=True)
-        new_message = {'role': 'assistant', 'content': ''}
-        for chunk in message:
-            try:
-                if len(chunk.choices) > 0:
-                    token = chunk.choices[0].delta.content
-                    if token:
-                        print(token, end='', flush=True)
-                        new_message['content'] += token
-            except Exception as e:
-                print(e)
-        new_response = {'id': chunk.id, 'object': 'chat.completion', 'created': chunk.created, 'model': chunk.model, 'usage': None, 'choices': None, 'finish_reason': None}
+        message, response = self.oai_api.handle_response(chat_history=self.advertiser.chat_history(), stream=self.stream)
+        if self.stream:
+            new_message = {'role': 'assistant', 'content': ''}
+            for chunk in message:
+                try:
+                    if len(chunk.choices) > 0:
+                        token = chunk.choices[0].delta.content
+                        if token:
+                            print(token, end='', flush=True)
+                            new_message['content'] += token
+                except Exception as e:
+                    print(e)
+            new_response = {'id': chunk.id, 'object': 'chat.completion', 'created': chunk.created, 'model': chunk.model, 'usage': None, 'choices': None, 'finish_reason': None}
+        else:
+            new_message = {'role': 'assistant', 'content': message}
+            new_response = response
         self.advertiser.chat_history.add_message(message=new_message, response=new_response)
-        return message
+        return message, product
 
     def run_chat_live(self, prompt:str):
         product = self.advertiser.parse(prompt)
