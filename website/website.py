@@ -97,7 +97,7 @@ def disclosure():
             try:
                 profile = json.loads(r.hget(prompts['session_key'], 'profile'))
             except Exception:
-                profile = ['ERROR']
+                profile = ['No Profile Generated Yet']
             return profile
     else:
         return ['Test for disclosure']
