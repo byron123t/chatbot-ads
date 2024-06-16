@@ -14,23 +14,28 @@ class OpenAIChatSession:
         self.advertiser = Advertiser(mode=mode, session=session, ad_freq=ad_freq, self_improvement=self_improvement, feature_manipulation=feature_manipulation, verbose=verbose, conversation_id=conversation_id)
         self.verbose = verbose
         self.ad_transparency = ad_transparency
+        self.stream = stream
 
     def run_chat(self, prompt:str):
         product = self.advertiser.parse(prompt)
-        message, response = self.oai_api.handle_response(chat_history=self.advertiser.chat_history(), stream=True)
-        new_message = {'role': 'assistant', 'content': ''}
-        for chunk in message:
-            try:
-                if len(chunk.choices) > 0:
-                    token = chunk.choices[0].delta.content
-                    if token:
-                        print(token, end='', flush=True)
-                        new_message['content'] += token
-            except Exception as e:
-                print(e)
-        new_response = {'id': chunk.id, 'object': 'chat.completion', 'created': chunk.created, 'model': chunk.model, 'usage': None, 'choices': None, 'finish_reason': None}
+        message, response = self.oai_api.handle_response(chat_history=self.advertiser.chat_history(), stream=self.stream)
+        if self.stream:
+            new_message = {'role': 'assistant', 'content': ''}
+            for chunk in message:
+                try:
+                    if len(chunk.choices) > 0:
+                        token = chunk.choices[0].delta.content
+                        if token:
+                            print(token, end='', flush=True)
+                            new_message['content'] += token
+                except Exception as e:
+                    print(e)
+            new_response = {'id': chunk.id, 'object': 'chat.completion', 'created': chunk.created, 'model': chunk.model, 'usage': None, 'choices': None, 'finish_reason': None}
+        else:
+            new_message = {'role': 'assistant', 'content': message}
+            new_response = response
         self.advertiser.chat_history.add_message(message=new_message, response=new_response)
-        return message
+        return message, product
 
     def run_chat_live(self, prompt:str):
         product = self.advertiser.parse(prompt)
