@@ -66,7 +66,7 @@ class Advertiser:
                     prior_products.append(self.product[conversation_id]['name'])
                     r.hset(self.session, 'products', json.dumps(prior_products))
             elif self.product[conversation_id]['name']:
-                r.hset(self.session, 'products', json.dumps(self.product[conversation_id]['name']))
+                r.hset(self.session, 'products', json.dumps([self.product[conversation_id]['name']]))
             else:
                 r.hset(self.session, 'products', json.dumps([]))
         else:
