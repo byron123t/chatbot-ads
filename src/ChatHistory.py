@@ -103,7 +103,7 @@ class ChatHistory:
 
     def check_length(self):
         tokens = self.encoding.encode(str(self()))
-        if len(tokens) > 2500:
+        if len(tokens) > 10000:
             return True
         else:
             return False

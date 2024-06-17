@@ -1,0 +1,29 @@
+import os, json, random
+import pandas as pd
+from tqdm import tqdm
+from eval.evaluator import Evaluator
+from src.Chatbot import OpenAIChatSession
+
+
+args1 = {'mode': 'interest-based', 'ad_freq': 1.0, 'demo': None}
+args2 = {'mode': 'control', 'ad_freq': 0.0, 'demo': None}
+
+responses = []
+oai_eval = Evaluator()
+with open('/data/bjaytang/llm_evals/mt-benchmark/prompts.json', 'r') as infile:
+    prompts = json.load(infile)
+    with open('/data/bjaytang/llm_evals/mt-benchmark/categories.json', 'r') as infile:
+        categories = json.load(infile)
+        for prompt, category in tqdm(zip(prompts, categories)):
+            oai_ads = OpenAIChatSession(mode=args1['mode'], ad_freq=args1['ad_freq'], demographics=args1['demo'])
+            oai_ctrl = OpenAIChatSession(mode=args2['mode'], ad_freq=args2['ad_freq'], demographics=args2['demo'])
+            try:
+                response_ads, product = oai_ads.run_chat(prompt)
+                response_ctrl, _ = oai_ctrl.run_chat(prompt)
+            except Exception as e:
+                continue
+            score_ads, response_judge_ads = oai_eval.stats_judge(prompt, response_ads)
+            score_ctrl, response_judge_ctrl = oai_eval.stats_judge(prompt, response_ctrl)
+            responses.append({'prompt': prompt, 'category': category, 'response_ads': response_ads, 'response_ctrl': response_ctrl, 'product': product, 'score_ads': score_ads, 'score_ctrl': score_ctrl, 'response_judge_ads': response_judge_ads, 'response_judge_ctrl': response_judge_ctrl})
+            with open('outputs/mtbenchmark.json', 'w') as outfile:
+                json.dump(responses, outfile, indent=4)

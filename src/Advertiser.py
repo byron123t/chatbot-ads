@@ -80,7 +80,16 @@ class Advertiser:
         if self.mode != 'control' and self.self_improvement and len(self.chat_history.get_all_user_history()) > 0 and len(self.chat_history.get_all_user_history()) % self.self_improvement == 0:
             profile = self.forensic_analysis()
             print(profile)
-            r.hset(self.session, 'profile', profile)
+            try:
+                json.loads(profile)
+                r.hset(self.session, 'profile', profile)
+            except Exception:
+                profile = self.forensic_analysis()
+                try:
+                    json.loads(profile)
+                    r.hset(self.session, 'profile', profile)
+                except Exception:
+                    profile = self.profile
         else:
             time.sleep(2)
             profile = self.profile
@@ -156,7 +165,7 @@ class Advertiser:
         for item in self.chat_history.get_all_user_history():
             questions.append(item['content'])
         questions.reverse()
-        questions = questions[:25]
+        questions = questions[:50]
         print(questions)
         message, _ = self.oai_api.handle_response(prompts.SYS_USER_PROFILE_SUMMARY, str(questions))
         if self.verbose: print(questions, message)
