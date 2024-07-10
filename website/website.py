@@ -21,7 +21,7 @@ ROOT = os.path.abspath('.')
 UPLOAD_FOLDER = os.path.join(ROOT, 'static', 'temp')
 EXTENSIONS = {'png', 'jpg', 'jpeg'}
 r = Redis(host='localhost', port=6379, password='', decode_responses=True)
-SESSIONKEYMODEMAP = {'interestads_gpt4_transparent': {'mode': 'user-centric', 'model': 'gpt-4o', 'ad_freq': 1.0, 'ad_transparency': 'disclosure', 'self_improvement': 1, 'feature_manipulation': True}, 'interestads_gpt4_none': {'mode': 'user-centric', 'model': 'gpt-4o', 'ad_freq': 1.0, 'self_improvement': 1, 'feature_manipulation': True}, 'interestads_gpt35_transparent': {'mode': 'user-centric', 'model': 'gpt-3.5-turbo', 'ad_freq': 1.0, 'ad_transparency': 'disclosure', 'self_improvement': 1, 'feature_manipulation': True}, 'interestads_gpt35_none': {'mode': 'user-centric', 'model': 'gpt-3.5-turbo', 'ad_freq': 1.0, 'self_improvement': 1, 'feature_manipulation': True}, 'control_gpt4': {'mode': 'control', 'model': 'gpt-4o', 'ad_freq': 0.0}, 'control_gpt35': {'mode': 'control', 'model': 'gpt-3.5-turbo', 'ad_freq': 0.0}}
+SESSIONKEYMODEMAP = {'interestads_gpt4_transparent': {'mode': 'user-centric', 'model': 'gpt-4o', 'ad_freq': 1.0, 'ad_transparency': 'disclosure', 'self_improvement': 1, 'feature_manipulation': True}, 'interestads_gpt4_none': {'mode': 'user-centric', 'model': 'gpt-4o', 'ad_freq': 1.0, 'self_improvement': 1, 'feature_manipulation': True}, 'interestads_gpt35_transparent': {'mode': 'user-centric', 'model': 'gpt-3.5-turbo', 'ad_freq': 1.0, 'ad_transparency': 'disclosure', 'self_improvement': 1, 'feature_manipulation': True}, 'interestads_gpt35_none': {'mode': 'user-centric', 'model': 'gpt-3.5-turbo', 'ad_freq': 1.0, 'self_improvement': 1, 'feature_manipulation': True}, 'control_gpt4': {'mode': 'control', 'model': 'gpt-4o', 'ad_freq': 0.0}, 'control_gpt35': {'mode': 'control', 'model': 'gpt-3.5-turbo', 'ad_freq': 0.0}, 'incorrect_session_key': {'mode': 'user-centric', 'model': 'gpt-4o', 'ad_freq': 1.0, 'self_improvement': 1, 'feature_manipulation': True, 'ad_transparency': 'disclosure'}}
 
 app = Flask(__name__)
 CORS(app)
@@ -38,7 +38,7 @@ def api():
         prompts = json.loads(request.data)
         print(prompts)
         if not r.exists('SESSIONKEY_VARIABLEMODE_MAPPER'):
-            r.set('SESSIONKEY_VARIABLEMODE_MAPPER', json.dumps({'interestads_gpt4_transparent': [], 'interestads_gpt4_none': [], 'interestads_gpt35_transparent': [], 'interestads_gpt35_none': [], 'control_gpt4': [], 'control_gpt35': []}))
+            r.set('SESSIONKEY_VARIABLEMODE_MAPPER', json.dumps({'interestads_gpt4_transparent': [], 'interestads_gpt4_none': [], 'interestads_gpt35_transparent': [], 'interestads_gpt35_none': [], 'control_gpt4': [], 'control_gpt35': [], 'incorrect_session_key': []}))
         data = json.loads(r.get('SESSIONKEY_VARIABLEMODE_MAPPER'))
         found = False
         for mode, session_keys in data.items():
@@ -48,8 +48,20 @@ def api():
         if found:
             kwargs = SESSIONKEYMODEMAP[mode].copy()
         else:
-            lengths = {k: len(v) for k, v in data.items()}
-            mode = min(lengths, key=lengths.get)
+            if prompts['session_key'].strip().startswith('E'):
+                mode = 'control_gpt4'
+            elif prompts['session_key'].strip().startswith('F'):
+                mode = 'control_gpt35'
+            elif prompts['session_key'].strip().startswith('G'):
+                mode = 'interestads_gpt4_none'
+            elif prompts['session_key'].strip().startswith('H'):
+                mode = 'interestads_gpt35_none'
+            elif prompts['session_key'].strip().startswith('I'):
+                mode = 'interestads_gpt4_transparent'
+            elif prompts['session_key'].strip().startswith('J'):
+                mode = 'interestads_gpt35_transparent'
+            else:
+                mode = 'incorrect_session_key'
             kwargs = SESSIONKEYMODEMAP[mode].copy()
             data[mode].append(prompts['session_key'])
             r.set('SESSIONKEY_VARIABLEMODE_MAPPER', json.dumps(data))
