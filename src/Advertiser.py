@@ -77,7 +77,9 @@ class Advertiser:
 
     def parse(self, prompt:str):
         self.chat_history.add_message(role='user', content=prompt)
-        if self.mode != 'control' and self.self_improvement and len(self.chat_history.get_all_user_history()) > 0 and len(self.chat_history.get_all_user_history()) % self.self_improvement == 0:
+        if self.mode == 'control':
+            return None
+        if self.self_improvement and len(self.chat_history.get_all_user_history()) > 0 and len(self.chat_history.get_all_user_history()) % self.self_improvement == 0:
             profile = self.forensic_analysis()
             print(profile)
             try:

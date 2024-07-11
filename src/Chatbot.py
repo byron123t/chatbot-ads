@@ -8,7 +8,7 @@ from flask import Response
 absolute_path = os.path.dirname(os.path.abspath(__file__))
 
 class OpenAIChatSession:
-    def __init__(self, session:str='', mode:str='control', model='gpt-3.5-turbo', ad_freq:float=1.0, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, ad_transparency:str='none', verbose:bool=False):
+    def __init__(self, session:str='', mode:str='control', model='gpt-3.5-turbo', ad_freq:float=1.0, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, ad_transparency:str='none', stream:bool=False, verbose:bool=False):
         self.oai_response_api = OpenAIAPI(verbose=verbose, model=model)
         self.oai_api = OpenAIAPI(verbose=verbose)
         self.advertiser = Advertiser(mode=mode, session=session, ad_freq=ad_freq, self_improvement=self_improvement, feature_manipulation=feature_manipulation, verbose=verbose, conversation_id=conversation_id)
@@ -58,20 +58,18 @@ class OpenAIChatSession:
                     out_data = {'content': token, 'finish_reason': finish_reason}
                     if token:
                         new_message['content'] += token
-                    if self.ad_transparency == 'icon' and not sent_disclosure and product['name']:
+                    if self.ad_transparency == 'icon' and not sent_disclosure and product and product['name']:
                         print('REACHED')
                         stripped_product = product['name'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
                         stripped_message = new_message['content'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
-                        print(stripped_message)
                         print(stripped_product)
                         if stripped_product in stripped_message:
                             sent_disclosure = True
                             yield 'data: {}\n\n'.format(json.dumps({'content': '$^^ad^^$', 'finish_reason': None}, separators=(',', ':')))
-                    elif self.ad_transparency == 'disclosure' and not sent_disclosure and product['name']:
+                    elif self.ad_transparency == 'disclosure' and not sent_disclosure and product and product['name']:
                         print('REACHED')
                         stripped_product = product['name'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
                         stripped_message = new_message['content'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
-                        print(stripped_message)
                         print(stripped_product)
                         if stripped_product in stripped_message:
                             sent_disclosure = True

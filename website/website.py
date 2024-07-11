@@ -48,21 +48,23 @@ def api():
         if found:
             kwargs = SESSIONKEYMODEMAP[mode].copy()
         else:
-            if prompts['session_key'].strip().startswith('E'):
+            if prompts['session_key'].strip().lower().startswith('er_'):
                 mode = 'control_gpt4'
-            elif prompts['session_key'].strip().startswith('F'):
+            elif prompts['session_key'].strip().lower().startswith('fr_'):
                 mode = 'control_gpt35'
-            elif prompts['session_key'].strip().startswith('G'):
+            elif prompts['session_key'].strip().lower().startswith('gr_'):
                 mode = 'interestads_gpt4_none'
-            elif prompts['session_key'].strip().startswith('H'):
+            elif prompts['session_key'].strip().lower().startswith('hr_'):
                 mode = 'interestads_gpt35_none'
-            elif prompts['session_key'].strip().startswith('I'):
+            elif prompts['session_key'].strip().lower().startswith('ir_'):
                 mode = 'interestads_gpt4_transparent'
-            elif prompts['session_key'].strip().startswith('J'):
+            elif prompts['session_key'].strip().lower().startswith('jr_'):
                 mode = 'interestads_gpt35_transparent'
             else:
                 mode = 'incorrect_session_key'
             kwargs = SESSIONKEYMODEMAP[mode].copy()
+            if mode not in data:
+                data[mode] = []
             data[mode].append(prompts['session_key'])
             r.set('SESSIONKEY_VARIABLEMODE_MAPPER', json.dumps(data))
         print(mode)
