@@ -60,7 +60,8 @@
         "Art Museums & Galleries": {},
         "Design": {},
         "Painting": {},
-        "Photographic & Digital Arts": {}
+        "Photographic & Digital Arts": {},
+        "Creative Writing": {}
     },
     "Autos & Vehicles": {
         "Bicycles & Accessories": {},
@@ -345,7 +346,8 @@
         "Steroids & Performance-Enhancing Drugs": {},
         "Vision Care": {},
         "Eyeglasses & Contacts": {},
-        "Women's Health": {}
+        "Women's Health": {},
+        "Fitness": {}
     },
     "Hobbies & Leisure": {
         "Clubs & Organizations": {},
@@ -365,7 +367,8 @@
         "Water Activities": {},
         "Boating": {},
         "Surf & Swim": {},
-        "Ancient Civilizations.": {}
+        "Ancient Civilizations.": {},
+        "Ancient Civilizations": {}
     },
     "Home & Garden": {
         "Bed & Bath": {},
@@ -653,7 +656,8 @@
         "Travel Itinerary": {},
         "Travel planning in Seoul": {},
         "Travel destination suggestions": {},
-        "Travel snacks": {}
+        "Travel snacks": {},
+        "Travel recommendations": {}
     },
     "No topic provided. Please specify a topic.": {},
     "Emergency response.": {},
@@ -729,5 +733,7 @@
     "Physics": {},
     "Ancient Rome": {},
     "Roman mythology": {},
-    "Roman Economy": {}
+    "Roman Economy": {},
+    "Ancient Civilizations": {},
+    "Requesting a Quote for Backflow Testing": {}
 }

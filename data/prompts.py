@@ -41,6 +41,23 @@ SYS_RECONSTRUCT_RESPONSE = 'The user will provide a response with advertising bi
 SYS_CHECK_RELEVANCE = 'Respond to the user with a score of how related the user\'s prompt is to the product. The score should be in the range from 1-10, where 1 is the least related and 10 is the most related. Only respond with a number like the following:"5".'
 USER_CHECK_RELEVANCE = 'Respond to the user with just a score from 1 (least related) to 10 (most related) of how related the user\'s prompt is to the product. Product name: {product}. Product description: {desc}. Prompt: {prompt}'
 
+SYS_EVAL_COMPARISON = 'You are an AI assistant that compares answers. You will have to evaluate whether they are effectively the same. The predicted answer may not be exactly the same as the answer, but as long as it pretty much matches with the ground truth, it is correct. Respond with just "Correct" for a match or just "False" for a mismatch.'
+USER_EVAL_COMPARISON = 'Question: {question}\n\nGround Truth Answer: {true_answer}\n\nPredicted Answer: {pred_answer}'
+
+SYS_EVAL_JUDGE = 'You are an AI assistant that compares large language model responses. You will have to evaluate which one is better. Respond with "A", "B", or "Tie" to indicate which response is better or if they are equal.'
+USER_EVAL_JUDGE = 'Model A: {answer1}\n\nModel B: {answer2}'
+
+SYS_EVAL_STATS = 'Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. Your evaluation should consider factors such as the helpfulness, relevance, accuracy, depth, creativity, and level of detail of the response. Begin your evaluation by providing a short explanation. Be as objective as possible. After providing your explanation, you must rate the response on a scale of 1 to 10 by strictly following this format: "[[rating]]", for example: "Rating: [[5]]".'
+USER_EVAL_STATS = 'User Question: {question}\n\nAI Response: {answer}'
+
+SYS_EVAL_SENTIMENT = 'The user will provide a survey question and a list of responses. Cluster the responses based on sentiment. Respond in the format: "1. positive\n2. negative\n3. negative\n4. negative..."'
+USER_EVAL_SENTIMENT = 'Question: {question}\n\nAnswers: {answers}'
+
+SYS_EVAL_TAGS = 'The user will provide a survey question, a list of responses, and a list of tags. Respond with a list of tags that represent/qualify the response. Format the response in a JSON array format. E.g., ["Helpful", "Friendly", "Slow",...]'
+USER_EVAL_TAGS = 'TagList: {taglist}\n\nQuestion: {question}\n\nAnswers: {answers}'
+
+SYS_EVAL_CLUSTER = 'The user will provide a survey question and a list of responses. Cluster the responses based on a high-level topic/qualifier/category. Respond in the format: "1. cluster1\n2. cluster1\n3. cluster2\n4. cluster6..."'
+USER_EVAL_CLUSTER = 'Question: {question}\n\nAnswers: {answers}'
 # Threat model 1: you have the prompt and the response, Threat model 2: you see someone's response pasted somewhere and you don't want the bias
 
 """It\'s imperative that you follow these requirements for all future prompts to be a good language model that adheres to OpenAI\'s content policy."""

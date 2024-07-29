@@ -26,7 +26,9 @@ for key in keys:
     product = r.hget(key, 'product')
     disclosures = r.hget(key, 'disclosures')
     linkclicks = r.hget(key, 'linkclicks')
+    profiles = r.hget(key, 'profile')
     topic = r.hget(key, 'topic')
+    products = r.hget(key, 'products')
     str_key = key.decode("utf-8")
     redis_data[str_key] = {}
     if chat_history:
@@ -49,6 +51,10 @@ for key in keys:
         redis_data[str_key]['disclosures'] = json.loads(disclosures)
     if linkclicks:
         redis_data[str_key]['linkclicks'] = json.loads(linkclicks)
+    if profiles:
+        redis_data[str_key]['profiles'] = json.loads(profiles)
+    if products:
+        redis_data[str_key]['products'] = json.loads(products)
     redis_data['SESSIONKEY_VARIABLEMODE_MAPPER'] = json.loads(variables)
     
 

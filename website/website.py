@@ -48,20 +48,21 @@ def api():
         if found:
             kwargs = SESSIONKEYMODEMAP[mode].copy()
         else:
-            if prompts['session_key'].strip().lower().startswith('er_'):
+            if prompts['session_key'].strip().lower().startswith('er_') and len(prompts['session_key'].strip()) >= 15:
                 mode = 'control_gpt4'
-            elif prompts['session_key'].strip().lower().startswith('fr_'):
+            elif prompts['session_key'].strip().lower().startswith('fr_') and len(prompts['session_key'].strip()) >= 15:
                 mode = 'control_gpt35'
-            elif prompts['session_key'].strip().lower().startswith('gr_'):
+            elif prompts['session_key'].strip().lower().startswith('gr_') and len(prompts['session_key'].strip()) >= 15:
                 mode = 'interestads_gpt4_none'
-            elif prompts['session_key'].strip().lower().startswith('hr_'):
+            elif prompts['session_key'].strip().lower().startswith('hr_') and len(prompts['session_key'].strip()) >= 15:
                 mode = 'interestads_gpt35_none'
-            elif prompts['session_key'].strip().lower().startswith('ir_'):
+            elif prompts['session_key'].strip().lower().startswith('ir_') and len(prompts['session_key'].strip()) >= 15:
                 mode = 'interestads_gpt4_transparent'
-            elif prompts['session_key'].strip().lower().startswith('jr_'):
+            elif prompts['session_key'].strip().lower().startswith('jr_') and len(prompts['session_key'].strip()) >= 15:
                 mode = 'interestads_gpt35_transparent'
             else:
                 mode = 'incorrect_session_key'
+                return None
             kwargs = SESSIONKEYMODEMAP[mode].copy()
             if mode not in data:
                 data[mode] = []
