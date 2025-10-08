@@ -1,0 +1,134 @@
+from src.API import OpenAIAPI
+from src.Advertiser import Advertiser
+import json, os, argparse, openai
+from flask import Response
+
+
+absolute_path = os.path.dirname(os.path.abspath(__file__))
+
+class OpenAIChatSession:
+    def __init__(self, session:str='', mode:str='control', model='gpt-4o', ad_freq:float=1.0, conversation_id:str='', self_improvement:int=None, feature_manipulation:bool=False, ad_transparency:str='none', stream:bool=False, verbose:bool=False, EVAL:bool=False, temperature:float=None, top_p:float=None):
+        self.oai_response_api = OpenAIAPI(verbose=verbose, model=model)
+        self.oai_api = OpenAIAPI(verbose=verbose)
+        self.advertiser = Advertiser(mode=mode, session=session, ad_freq=ad_freq, self_improvement=self_improvement, feature_manipulation=feature_manipulation, verbose=verbose, conversation_id=conversation_id, EVAL=EVAL)
+        self.verbose = verbose
+        self.ad_transparency = ad_transparency
+        self.stream = stream
+        self.EVAL = EVAL
+        self.temperature = temperature
+        self.top_p = top_p
+
+    def run_chat(self, prompt:str):
+        product = self.advertiser.parse(prompt)
+        if self.temperature is not None:
+            message, response = self.oai_response_api.handle_response_params(chat_history=self.advertiser.chat_history(), stream=self.stream, temperature=self.temperature)
+        elif self.top_p is not None:
+            message, response = self.oai_response_api.handle_response_params(chat_history=self.advertiser.chat_history(), stream=self.stream, top_p=self.top_p)
+        else:
+            message, response = self.oai_api.handle_response(chat_history=self.advertiser.chat_history(), stream=self.stream)
+
+        if self.stream:
+            new_message = {'role': 'assistant', 'content': ''}
+            for chunk in message:
+                try:
+                    if len(chunk.choices) > 0:
+                        token = chunk.choices[0].delta.content
+                        if token:
+                            print(token, end='', flush=True)
+                            new_message['content'] += token
+                except Exception as e:
+                    print(e)
+            new_response = {'id': chunk.id, 'object': 'chat.completion', 'created': chunk.created, 'model': chunk.model, 'usage': None, 'choices': None, 'finish_reason': None}
+        else:
+            new_message = {'role': 'assistant', 'content': message}
+            new_response = response
+        self.advertiser.chat_history.add_message(message=new_message, response=new_response)
+        return message, product
+
+    def run_chat_live(self, prompt:str):
+        product = self.advertiser.parse(prompt)
+        print(self.advertiser.chat_history())
+        print(product)
+        message, response = self.oai_response_api.handle_response(chat_history=self.advertiser.chat_history(), stream=True)
+        new_message = {'role': 'assistant', 'content': ''}
+        token_count = 0
+        usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        finish_reason = None
+        for chunk in message:
+            token_count += 1
+            # yield 'data: {}\n\n'.format(json.dumps(chunk, separators=(',', ':')))
+            if self.ad_transparency == 'disclosure':
+                sent_disclosure = False
+            try:
+                if len(chunk.choices) > 0:
+                    token = chunk.choices[0].delta.content
+                    finish_reason = chunk.choices[0].finish_reason
+                    out_data = {'content': token, 'finish_reason': finish_reason}
+                    if token:
+                        new_message['content'] += token
+                    if self.ad_transparency == 'icon' and not sent_disclosure and product and product['name']:
+                        stripped_product = product['name'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
+                        stripped_message = new_message['content'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
+                        if stripped_product in stripped_message:
+                            sent_disclosure = True
+                            yield 'data: {}\n\n'.format(json.dumps({'content': '$^^ad^^$', 'finish_reason': None}, separators=(',', ':')))
+                    elif self.ad_transparency == 'disclosure' and not sent_disclosure and product and product['name']:
+                        stripped_product = product['name'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
+                        stripped_message = new_message['content'].lower().replace(' ', '').replace('-', '').replace('_', '').replace('.', '').replace(',', '').replace(':', '').replace(';', '').replace('\n', '').strip()
+                        if stripped_product in stripped_message:
+                            sent_disclosure = True
+                            yield 'data: {}\n\n'.format(json.dumps({'content': '$^^ad^^$', 'finish_reason': None}, separators=(',', ':')))
+                            yield 'data: {}\n\n'.format(json.dumps({'content': '$^^disclosure^^$', 'finish_reason': None}, separators=(',', ':')))
+                    yield 'data: {}\n\n'.format(json.dumps(out_data, separators=(',', ':')))
+            except Exception as e:
+                print(e)
+        usage['completion_tokens'] = token_count
+        tokens = self.advertiser.chat_history.encoding.encode(str(prompt))
+        usage['prompt_tokens'] = len(tokens)
+        usage['total_tokens'] = len(tokens) + token_count
+        new_response = {'id': chunk.id, 'object': 'chat.completion', 'created': chunk.created, 'model': chunk.model, 'usage': token_count, 'choices': [new_message], 'finish_reason': finish_reason}
+        self.advertiser.chat_history.add_message(message=new_message, response=new_response)
+        return 'data: [DONE]'
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Chatbot Advertising Demo')
+    parser.add_argument('--mode', type=str, default='interest-based', choices=['interest-based', 'chatbot-centric', 'user-centric', 'influencer'], help='Chatbot settings: mode (string), choose from [interest-based, chatbot-centric, user-centric, influencer]')
+    parser.add_argument('--model', type=str, default='gpt-4o', help='Chatbot settings: model (string), choose from [gpt-3.5-turbo, gpt-4o, gpt-4o-mini]')
+    parser.add_argument('--ad-freq', type=float, default=1.0, help='Chatbot settings: ad frequency (float), 0.0 - 1.0 (0.0 = no ads, 1.0 = ads every message)')
+    parser.add_argument('--self-improvement', type=int, default=None, help='Chatbot settings: self improvement (int), self improvement of demographics and profiling every X messages')
+    parser.add_argument('--verbose', action='store_true', help='Chatbot settings: verbose (bool), print details for debugging')
+    args = parser.parse_args()
+    
+    oai = OpenAIChatSession(mode=args.mode, model=args.model, ad_freq=args.ad_freq, self_improvement=args.self_improvement, verbose=args.verbose)
+    print('Running the following parameters:\n\tMode: {}\n\tModel: {}\n\tAd Frequency: {}\n\tSelf Improvement: {}\n\tVerbose: {}'.format(oai.advertiser.mode, args.model, oai.advertiser.ad_freq, oai.advertiser.self_improvement, oai.verbose))
+
+    print('====================')
+    print('USER: ')
+    user_input = input()
+    print('====================')
+    while True:
+        if user_input == 'new_session':
+            print('SESSION ID: ')
+            oai.advertiser.chat_history.new_session(input())
+            print('New session started with ID: {}'.format(oai.advertiser.chat_history.session))
+            continue
+        elif user_input == 'load_session':
+            print('SESSION ID: ')
+            oai.advertiser.chat_history.load_session(input())
+            print('Loaded session with ID: {}'.format(oai.advertiser.chat_history.session))
+            continue
+        elif user_input == 'exit':
+            print('Exiting...')
+            exit()
+        message, product = oai.run_chat('{}'.format(user_input))
+        print('====================')
+        print('CHATBOT OUTPUT: {}'.format(message))
+        print('PRODUCT: {}'.format(product))
+        print('====================')
+        print('\n\n')
+        print('====================')
+        print('USER: ')
+        user_input = input()
+        print('====================')
+        

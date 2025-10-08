@@ -1,0 +1,8 @@
+tokenizers==0.21.4
+torch==2.7.1
+torchvision==0.22.1
+tqdm==4.67.1
+transformers==4.54.1
+tzdata==2025.2
+unsloth==2025.7.11
+unsloth_zoo==2025.7.11
